@@ -1,0 +1,100 @@
+{
+  "unidad": "Unidad 1 - Números enteros",
+  "asignatura": "Matemática 8vo EGB",
+  "trimestre": 1,
+  "parcial": 1,
+  "fuente_silabo": "Syllabu_micro_8vo_T1_P1.docx",
+  "fuente_guia": "main (1).pdf",
+  "generado": "2026-07-28",
+  "semanas": [
+    {
+      "semana": 0,
+      "tema": "Diagnóstico y nivelación de aprendizajes requeridos",
+      "codigos_silabo": ["8.MED.A.R.L.M.6", "8.MED.A.R.L.M.6.1", "8.MED.A.R.L.M.6.1.1", "8.MED.A.A.3", "8.MED.A.A.3.1", "8.MED.A.A.3.1.1"],
+      "codigos_guia": ["8.MED.A.R.L.M.6", "8.MED.A.R.L.M.6.1", "8.MED.A.R.L.M.6.1.1", "8.MED.A.A.3", "8.MED.A.A.3.1", "8.MED.A.A.3.1.1"],
+      "paginas_guia": "3-17",
+      "adaptacion_curricular_en_silabo": true,
+      "adaptacion_curricular_en_guia": false,
+      "estado": "CONCORDANTE",
+      "observacion": "Códigos y tema alineados. Ciclo Activación/Anticipación/Construcción/Consolidación del sílabo corresponde a Explora y conecta / Necesitas recordar / Períodos 1-5 / Refuerzo graduado de la guía."
+    },
+    {
+      "semana": 1,
+      "tema": "Números enteros: representación, valor absoluto y orden",
+      "codigos_silabo": ["8.SUP.A.R.L.M.1", "8.SUP.A.R.L.M.1.1", "8.SUP.A.R.L.M.1.1.1"],
+      "codigos_guia": ["8.SUP.A.R.L.M.1", "8.SUP.A.R.L.M.1.1", "8.SUP.A.R.L.M.1.1.1"],
+      "paginas_guia": "18-41",
+      "adaptacion_curricular_en_silabo": true,
+      "adaptacion_curricular_en_guia": false,
+      "estado": "CONCORDANTE",
+      "observacion": "Alineado en código y contenido (recta numérica, plano cartesiano, opuestos, valor absoluto)."
+    },
+    {
+      "semana": 2,
+      "tema": "Adición y sustracción de números enteros",
+      "codigos_silabo": ["8.SUP.A.R.L.M.1", "8.SUP.A.R.L.M.1.1", "8.SUP.A.R.L.M.1.1.2", "8.SUP.G.F.E.4", "8.SUP.G.F.E.4.1", "8.SUP.G.F.E.4.1.1"],
+      "codigos_guia": ["8.SUP.A.R.L.M.1", "8.SUP.A.R.L.M.1.1", "8.SUP.A.R.L.M.1.1.2", "8.SUP.G.F.E.4", "8.SUP.G.F.E.4.1", "8.SUP.G.F.E.4.1.1"],
+      "paginas_guia": "42-59",
+      "adaptacion_curricular_en_silabo": true,
+      "adaptacion_curricular_en_guia": false,
+      "estado": "CONCORDANTE",
+      "observacion": "Incluye eje transversal de Gestión Financiera y Emprendimiento, presente en ambos documentos."
+    },
+    {
+      "semana": 3,
+      "tema": "Signos, paréntesis y operaciones combinadas con enteros",
+      "codigos_silabo": ["8.SUP.A.R.L.M.8", "8.SUP.A.R.L.M.8.1", "8.SUP.A.R.L.M.8.1.1"],
+      "codigos_guia": ["8.SUP.A.R.L.M.8", "8.SUP.A.R.L.M.8.1", "8.SUP.A.R.L.M.8.1.1"],
+      "paginas_guia": "60-77",
+      "adaptacion_curricular_en_silabo": true,
+      "adaptacion_curricular_en_guia": false,
+      "estado": "CONCORDANTE",
+      "observacion": "Alineado."
+    },
+    {
+      "semana": 4,
+      "tema": "Multiplicación y división exacta de números enteros",
+      "codigos_silabo": ["8.SUP.A.R.L.M.1", "8.SUP.A.R.L.M.1.1", "8.SUP.A.R.L.M.1.1.3"],
+      "codigos_guia": ["8.SUP.A.R.L.M.1", "8.SUP.A.R.L.M.1.1", "8.SUP.A.R.L.M.1.1.3"],
+      "paginas_guia": "78-95",
+      "adaptacion_curricular_en_silabo": true,
+      "adaptacion_curricular_en_guia": false,
+      "estado": "CONCORDANTE",
+      "observacion": "Última semana desarrollada en la guía. El PDF termina aquí (pág. 95 de la extracción, numerada internamente como 94 de 94)."
+    },
+    {
+      "semana": 5,
+      "tema": "Potenciación, radicación y polinomios aritméticos con enteros",
+      "codigos_silabo": ["8.SUP.A.R.L.M.8", "8.SUP.A.R.L.M.8.1", "8.SUP.A.R.L.M.8.1.2"],
+      "codigos_guia": [],
+      "paginas_guia": null,
+      "adaptacion_curricular_en_silabo": true,
+      "adaptacion_curricular_en_guia": false,
+      "estado": "FALTANTE_EN_GUIA",
+      "observacion": "Declarada en la ruta del parcial (pág. 2 del PDF) pero sin desarrollo pedagógico en la guía. No hay lección, ejemplos, refuerzo ni taller para esta semana."
+    },
+    {
+      "semana": 6,
+      "tema": "Evaluación parcial de la Unidad 1: números enteros. Retroalimentación y análisis de resultados",
+      "codigos_silabo": ["8.SUP.A.R.L.M.8", "8.SUP.A.R.L.M.8.1", "8.SUP.A.R.L.M.8.1.3", "8.SUP.A.A.2", "8.SUP.A.A.2.1", "8.SUP.A.A.2.1.1"],
+      "codigos_guia": [],
+      "paginas_guia": null,
+      "adaptacion_curricular_en_silabo": true,
+      "adaptacion_curricular_en_guia": false,
+      "estado": "FALTANTE_EN_GUIA",
+      "observacion": "Declarada en la ruta del parcial pero sin instrumento de evaluación parcial ni hoja de retroalimentación en la guía."
+    }
+  ],
+  "adaptaciones_curriculares_detectadas_en_silabo": [
+    {"estudiante": "Ayala Rodríguez Sebastián", "necesidad": "Trastorno específico del aprendizaje (dislexia)", "grado": 2},
+    {"estudiante": "García Ramos Annia Daniela", "necesidad": "TDA", "grado": 2},
+    {"estudiante": "Quiroga Ortiz Juan David", "necesidad": "TEA", "grado": 2}
+  ],
+  "hallazgos_clave": [
+    "El sílabo (docx) especifica 7 bloques semanales (Semana 0 a Semana 6) con objetivo, competencias, estrategia metodológica en 4 fases (Activación, Anticipación, Construcción, Consolidación), recursos, nivel de logro y técnica-instrumento de evaluación, más adaptación curricular individual para 3 estudiantes en cada semana.",
+    "La guía didáctica (PDF) solo desarrolla contenido pedagógico para las Semanas 0-4 (94 páginas). Las Semanas 5 y 6 están mencionadas únicamente en la tabla resumen 'RUTA DEL PARCIAL' (página 2) pero no tienen lección, ejemplos, refuerzo, taller ni evaluación desarrollados.",
+    "Los códigos de competencia (p.ej. 8.SUP.A.R.L.M.1.1.1) coinciden exactamente entre ambos documentos para las semanas que sí están desarrolladas en la guía, lo que confirma trazabilidad estructural fuerte donde existe contenido.",
+    "Ninguna de las adaptaciones curriculares individuales (dislexia, TDA, TEA) definidas en el sílabo se refleja en la guía didáctica: el PDF no contiene versiones adaptadas de las actividades para esos 3 estudiantes.",
+    "Estructura del sílabo es tabular/administrativa (una fila por semana x variante curricular); la estructura de la guía es narrativa/instruccional dirigida al estudiante, organizada en secciones fijas por lección: Datos informativos, Propósito de la semana, Criterios de éxito, Explora y conecta, Necesitas recordar, Períodos numerados, Idea clave, Ejemplo/modelo paso a paso, Error frecuente, Refuerzo graduado, Práctica progresiva (Niveles 1-3), Conexión con el mundo, Taller integrador, Síntesis, Prueba escrita corta, Autoevaluación/metacognición."
+  ]
+}

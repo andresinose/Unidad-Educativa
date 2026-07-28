@@ -1,0 +1,18 @@
+# Python
+apps/api/.venv/
+apps/api/var/
+apps/api/.pytest_cache/
+**/__pycache__/
+*.pyc
+
+# Node / web
+apps/web/node_modules/
+apps/web/dist/
+
+# Env
+infra/.env
+.env
+
+# OS
+.DS_Store
+Thumbs.db
