@@ -41,3 +41,5 @@ async def generate(request: GenerationRequest) -> GeneratedResource:
         return generate_resource(week, week_concordance, request)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Error al generar el recurso con la IA: {exc}") from exc

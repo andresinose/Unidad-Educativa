@@ -3,8 +3,11 @@ import type { AnalyzeResponse, GeneratedResource, PedagogicalIntent } from './ty
 const BASE = '/api'
 
 export class ApiError extends Error {
-  constructor(message: string, public status: number) {
+  status: number
+
+  constructor(message: string, status: number) {
     super(message)
+    this.status = status
   }
 }
 

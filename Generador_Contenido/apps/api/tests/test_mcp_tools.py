@@ -85,3 +85,43 @@ def test_render_diagram_escapes_labels():
     svg = render_diagram(schema)
     assert "<script>alert" not in svg
     assert "&lt;script&gt;" in svg
+
+
+def test_build_word_search_generates_interactive_grid():
+    from app.mcp_server.tools.word_search import WordSearchSchema, build_word_search
+    schema = WordSearchSchema(
+        title="Sopa de Operaciones",
+        words=["SUMA", "RESTA", "MULTIPLICACION"],
+        grid_size=10
+    )
+    html = build_word_search(schema)
+    assert "<script>" in html and "<style>" in html
+    assert "Sopa de Operaciones" in html
+    assert "SUMA" in html
+    assert "uei-ws-grid" in html
+
+
+def test_build_flashcards_generates_3d_flip_cards():
+    from app.mcp_server.tools.flashcards import FlashcardsSchema, build_flashcards
+    schema = FlashcardsSchema(
+        title="Fichas de Álgebra",
+        cards=[{"front": "¿Qué es X?", "back": "Es la incógnita.", "category": "Concepto"}]
+    )
+    html = build_flashcards(schema)
+    assert "<style>" in html
+    assert "Fichas de Álgebra" in html
+    assert "¿Qué es X?" in html
+    assert "rotateY(180deg)" in html
+
+
+def test_build_study_guide_generates_structured_sections():
+    from app.mcp_server.tools.study_guide import StudyGuideSchema, build_study_guide
+    schema = StudyGuideSchema(
+        title="Guía de Enteros",
+        summary="Resumen de adición",
+        sections=[{"heading": "Regla 1", "bullets": ["Positivos + Positivos = Positivo"], "key_takeaway": "Conservar signo"}]
+    )
+    html = build_study_guide(schema)
+    assert "Guía de Enteros" in html
+    assert "Regla 1" in html
+    assert "Conservar signo" in html

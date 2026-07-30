@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
@@ -28,6 +27,48 @@ class AnalyzeResponse(BaseModel):
     concordance: ConcordanceResult
 
 
+def _validate_upload_bytes(file_path: Path, ext: str) -> None:
+    """Valida los Magic Bytes del archivo según la especificación v1.2 (Sección 3.1)."""
+    with file_path.open("rb") as f:
+        header = f.read(8)
+
+    if ext == ".docx":
+        if not header.startswith(b"PK\x03\x04"):
+            raise HTTPException(
+                status_code=415,
+                detail="El archivo .docx no tiene una firma ZIP/Word válida (Magic Bytes PK\x03\x04)."
+            )
+    elif ext == ".pdf":
+        if not header.startswith(b"%PDF"):
+            raise HTTPException(
+                status_code=415,
+                detail="El archivo .pdf no tiene una firma PDF válida (Magic Bytes %PDF)."
+            )
+        # Chequeo de PDF escaneado (sin capa de texto)
+        try:
+            import pdfplumber
+            with pdfplumber.open(file_path) as pdf:
+                if pdf.pages:
+                    txt = pdf.pages[0].extract_text() or ""
+                    if len(txt.strip()) < 50:
+                        raise HTTPException(
+                            status_code=422,
+                            detail="El PDF no contiene texto seleccionable; suba la versión digital."
+                        )
+                else:
+                    raise HTTPException(
+                        status_code=422,
+                        detail="El PDF no contiene texto seleccionable; suba la versión digital."
+                    )
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(
+                status_code=422,
+                detail="El PDF no contiene texto seleccionable; suba la versión digital."
+            )
+
+
 def _validate_upload(f: UploadFile) -> str:
     ext = Path(f.filename or "").suffix.lower()
     if ext not in ALLOWED_UPLOAD_EXTENSIONS:
@@ -52,17 +93,15 @@ async def _save_upload(f: UploadFile, dest_dir: Path, ext: str) -> Path:
                 dest.unlink(missing_ok=True)
                 raise HTTPException(status_code=400, detail="El archivo supera el tamaño máximo permitido (50 MB).")
             out.write(chunk)
+    
+    _validate_upload_bytes(dest, ext)
     return dest
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
+@router.post("/validar", response_model=AnalyzeResponse)
 async def analyze(silabo: UploadFile = File(...), guia: UploadFile = File(...)) -> AnalyzeResponse:
-    """Uploads + parses both documents and returns their structure plus concordance.
-
-    Nothing is persisted beyond the ephemeral session working directory — there
-    is no database. `session_id` lets the caller reference the same uploaded
-    files for a later /generate call in this iteration's scope.
-    """
+    """Uploads + parses both documents and returns their structure plus concordance v1.2."""
     silabo_ext = _validate_upload(silabo)
     guia_ext = _validate_upload(guia)
 
@@ -77,7 +116,7 @@ async def analyze(silabo: UploadFile = File(...), guia: UploadFile = File(...)) 
             silabo_data = parse_silabo_docx(silabo_path)
         else:
             silabo_data = fallback_silabo_extraction(extract_raw_text(silabo_path, silabo_ext))
-    except Exception as exc:  # noqa: BLE001 — surfaced to the teacher, not a crash
+    except Exception as exc:
         raise HTTPException(status_code=422, detail=f"No se pudo procesar el sílabo: {exc}") from exc
 
     try:
@@ -85,14 +124,11 @@ async def analyze(silabo: UploadFile = File(...), guia: UploadFile = File(...)) 
             guia_data = parse_guia_pdf(guia_path)
         else:
             guia_data = fallback_guia_extraction(extract_raw_text(guia_path, guia_ext))
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(status_code=422, detail=f"No se pudo procesar la guía: {exc}") from exc
 
     concordance = build_concordance(silabo_data, guia_data)
 
-    # Persisted only inside this session's ephemeral working directory (no DB) so
-    # a later /generate call in the same session can ground itself on the same
-    # validated data without re-uploading or re-parsing.
     (work_dir / "silabo.json").write_text(silabo_data.model_dump_json(), encoding="utf-8")
     (work_dir / "concordance.json").write_text(concordance.model_dump_json(), encoding="utf-8")
 

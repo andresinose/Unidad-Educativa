@@ -90,15 +90,16 @@ export default function App() {
     setGenerateError(null)
   }
 
+  const weeksList = analysis?.concordance.detalle_semanal || analysis?.concordance.weeks || []
   const selectedWeekTopic =
-    (selectedWeek !== null && analysis?.concordance.weeks.find((w) => w.week_number === selectedWeek)?.topic) || ''
+    (selectedWeek !== null && weeksList.find((w) => (w.semana ?? w.week_number) === selectedWeek)?.tema_silabo) || ''
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <h1 className="font-bold text-lg">Unidad Educativa Bilingüe Indoamérica</h1>
-          <p className="text-sm text-gray-500">Motor de análisis curricular y generación de recursos</p>
+          <h1 className="font-bold text-lg text-gray-900">Unidad Educativa Bilingüe Indoamérica</h1>
+          <p className="text-sm text-gray-500">Validador Pedagógico Curricular (Especificación v1.2)</p>
         </div>
       </header>
       <StepIndicator current={step} />

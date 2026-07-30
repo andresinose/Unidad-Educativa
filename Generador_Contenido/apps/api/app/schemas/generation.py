@@ -37,6 +37,9 @@ class GenerationRequest(BaseModel):
 class ResourceBlockType(str, Enum):
     diagram = "diagram"
     interactive_activity = "interactive_activity"
+    word_search = "word_search"
+    flashcards = "flashcards"
+    study_guide = "study_guide"
     geogebra = "geogebra"
     text = "text"
 

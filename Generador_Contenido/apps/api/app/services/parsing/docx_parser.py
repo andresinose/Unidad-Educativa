@@ -1,15 +1,4 @@
-"""Parses the sílabo (.docx) into a SilaboExtraction.
-
-Generic across subjects/grades: nothing here hardcodes a topic. The only
-assumption is the institution's own template shape (a "Datos informativos"
-key/value table, then one big weekly table alternating full-width "SEMANA
-N°x" / "ADAPTACIÓN CURRICULAR" separator rows with 6-column data rows) —
-that shape was verified against a real Math Unit 1 sílabo.
-
-Student names are never kept: `_anonymize` assigns a stable pseudonym
-("Estudiante A", "Estudiante B", ...) the first time each name is seen, so
-the same student maps to the same pseudonym across every week in one
-document, without the real name ever entering the extraction result.
+"""Parses the sílabo (.docx) into a SilaboExtraction according to Spec v1.2.
 """
 from __future__ import annotations
 
@@ -28,6 +17,7 @@ from app.services.parsing.text_utils import (
     first_line,
     second_line,
 )
+from app.services.concordance.subtopic_decomposer import descomponer_fallback
 
 INFO_FIELD_MAP = {
     "asignatura": "subject",
@@ -42,6 +32,9 @@ INFO_FIELD_MAP = {
     "fecha de inicio": "start_date",
     "fecha de finalización": "end_date",
     "fecha de finalizacion": "end_date",
+    "n° de periodos semanales": "periodos_semanales",
+    "n° de períodos semanales": "periodos_semanales",
+    "n° periodos semanales": "periodos_semanales",
 }
 
 
@@ -70,8 +63,6 @@ def _find_weekly_table(document: docx.document.Document):
 
 
 def _parse_info_table(table) -> dict[str, str]:
-    """Rows can hold one or two label/value pairs (e.g. 'Grado/Curso' + 'Paralelo/s'
-    side by side), so cells are dedup'd then walked two at a time."""
     info: dict[str, str] = {}
     for row in table.rows:
         raw_cells = [c.text.replace("\xa0", " ").strip() for c in row.cells]
@@ -108,13 +99,29 @@ class _Anonymizer:
 
 
 def _parse_general_row(week_number: int, cells: list[str]) -> SilaboWeek:
-    codes = extract_codes(cells[0] + "\n" + cells[1])
+    codes_col0 = extract_codes(cells[0])
+    codes_col1 = extract_codes(cells[1])
+    all_codes = sorted(set(codes_col0 + codes_col1))
+    
+    # Clasificar generales vs específicas (específicas tienen >= 6 segmentos en código)
+    comp_generales = [cells[0].strip()] if cells[0].strip() else []
+    comp_especificas = [cells[1].strip()] if cells[1].strip() else []
+    
     topic = extract_topic(cells[1])
+    if not topic and len(cells) > 1:
+        # Fallback si no tiene prefijo 'Tema:'
+        topic = cells[1].split("\n")[0].strip()
+        
     phases = extract_phases(cells[2])
+    subtemas = descomponer_fallback(topic)
+    
     return SilaboWeek(
         week_number=week_number,
         topic=topic,
-        competency_codes=codes,
+        subtemas=subtemas,
+        competency_codes=all_codes,
+        competencias_generales=comp_generales,
+        competencias_especificas=comp_especificas,
         methodology_phases=MethodologyPhases(**phases),
         resources=extract_resources(cells[3]),
         achievement_level=cells[4].strip(),
@@ -125,7 +132,6 @@ def _parse_general_row(week_number: int, cells: list[str]) -> SilaboWeek:
 def _parse_adaptation_row(cells: list[str], anonymizer: _Anonymizer) -> CurricularAdaptation:
     real_name = first_line(cells[0])
     need = second_line(cells[0])
-    codes = extract_codes(cells[0])  # kept for completeness even if unused downstream
     phases = extract_phases(cells[2])
     return CurricularAdaptation(
         student_ref=anonymizer.pseudonym(real_name) if real_name else "Estudiante (sin nombre)",
@@ -159,32 +165,37 @@ def parse_silabo_docx(path: str | Path) -> SilaboExtraction:
         raw_cells = [c.text for c in row.cells]
         dedup = _dedup([c.strip() for c in raw_cells])
 
-        if len(dedup) == 1:
-            text = dedup[0]
-            m = WEEK_HEADER_PATTERN.search(text)
-            if m:
+        if len(dedup) == 1 or (len(raw_cells) < 6 and any("SEMANA" in c.upper() for c in dedup)):
+            text = dedup[0] if dedup else ""
+            m = WEEK_HEADER_PATTERN.search(text) or re.search(r"SEMANA\s*N\s*[°ºo]?\s*(\d+)", text, re.IGNORECASE)
+            if m and len(text) < 60:
                 current_week = int(m.group(1))
                 mode = "general"
                 continue
-            if text.strip().lower() in ADAPTATION_HEADER_MARKERS:
+            if text.strip().lower() in ADAPTATION_HEADER_MARKERS or "ADAPTACIÓN CURRICULAR" in text.upper():
                 mode = "adaptation"
                 continue
-            continue  # unrecognized full-width separator row
+            continue  # fila separadora
 
         if dedup[0].lower().startswith("competencia general"):
-            continue  # column-header row, not data
+            continue  # encabezado de columnas
 
         if current_week is None or len(raw_cells) < 6:
             continue
 
         cells = [c.strip() for c in raw_cells]
         if mode == "general":
-            weeks[current_week] = _parse_general_row(current_week, cells)
+            w_parsed = _parse_general_row(current_week, cells)
+            weeks[current_week] = w_parsed
         elif mode == "adaptation" and current_week in weeks:
-            weeks[current_week].adaptations.append(_parse_adaptation_row(cells, anonymizer))
+            adapt = _parse_adaptation_row(cells, anonymizer)
+            weeks[current_week].adaptations.append(adapt)
+            weeks[current_week].adaptaciones_count += 1
+
+    parsed_weeks = [weeks[k] for k in sorted(weeks.keys())]
 
     return SilaboExtraction(
         **info,
-        weeks=[weeks[k] for k in sorted(weeks.keys())],
+        weeks=parsed_weeks,
         warnings=warnings,
     )
