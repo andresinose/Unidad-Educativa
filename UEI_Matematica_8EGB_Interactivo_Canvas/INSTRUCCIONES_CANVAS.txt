@@ -1,0 +1,19 @@
+PAQUETE HTML PARA CANVAS
+
+Contenido principal:
+- index.html: versión completa, responsiva e interactiva.
+- canvas-simple.html: versión visual sin JavaScript, útil si el LMS restringe scripts.
+- assets/pages/: las 95 páginas conservadas como imágenes WebP.
+- assets/source/material-original.pdf: documento fuente como respaldo.
+
+Forma recomendada de uso en Canvas:
+1. Suba el archivo ZIP al área Archivos del curso.
+2. Descomprímalo manteniendo exactamente la estructura de carpetas.
+3. Abra index.html desde Archivos y agregue su enlace a un módulo o página.
+4. Configure el enlace para abrirse en una nueva pestaña o en pantalla completa.
+5. Si la institución bloquea JavaScript, utilice canvas-simple.html.
+
+Importante:
+- No cambie de ubicación index.html respecto de la carpeta assets.
+- El cuaderno digital guarda notas y avance solo en el navegador del estudiante (localStorage); no envía respuestas a Canvas ni las califica.
+- Para recopilar respuestas o calificar, cree una tarea/cuestionario en Canvas y use este HTML como material de estudio.

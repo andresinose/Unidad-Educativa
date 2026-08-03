@@ -77,3 +77,51 @@ async function downloadBlob(path: string, resource: GeneratedResource, fallbackN
 
 export const exportHtml = (resource: GeneratedResource) => downloadBlob('/export/html', resource, 'recurso.html')
 export const exportPptx = (resource: GeneratedResource) => downloadBlob('/export/pptx', resource, 'recurso.pptx')
+
+export async function listMaterials(): Promise<import('./types').Material[]> {
+  const res = await fetch(`${BASE}/materials`)
+  return unwrap(res)
+}
+
+export const materialPreviewUrl = (id: string) => `${BASE}/materials/${id}/preview`
+
+export async function uploadMaterialPdf(archivo: File): Promise<import('./types').ConversionJob> {
+  const form = new FormData()
+  form.append('archivo', archivo)
+  const res = await fetch(`${BASE}/materials/upload`, { method: 'POST', body: form })
+  return unwrap(res)
+}
+
+export async function getConversionJob(jobId: string): Promise<import('./types').ConversionJob> {
+  const res = await fetch(`${BASE}/materials/jobs/${jobId}`)
+  return unwrap(res)
+}
+
+export async function downloadMaterial(material: import('./types').Material) {
+  const res = await fetch(`${BASE}/materials/${material.id}/download`)
+  if (!res.ok) throw new ApiError(res.statusText, res.status)
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = material.filename || `material_${material.id}.html`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
+export async function downloadMaterialZip(material: import('./types').Material) {
+  const res = await fetch(`${BASE}/materials/${material.id}/download-zip`)
+  if (!res.ok) throw new ApiError(res.statusText, res.status)
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `material_${material.id}.zip`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+

@@ -168,3 +168,26 @@ export interface GeneratedResource {
   blocks: ResourceBlock[]
   mcp_tool_trace: string[]
 }
+
+export interface Material {
+  id: string
+  title: string
+  subject: string
+  grade: string
+  unit: string
+  teacher: string
+  term: string
+  pages: number
+  filename: string
+  source: 'curado' | 'convertido'
+}
+
+export interface ConversionJob {
+  id: string
+  estado: 'procesando' | 'completado' | 'error'
+  pagina_actual: number
+  total_paginas: number
+  material_id: string | null
+  error: string | null
+}
+

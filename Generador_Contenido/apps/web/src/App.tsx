@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import MenuInicial from './components/MenuInicial'
+import GeneratorView from './components/GeneratorView'
 import UploadStep from './components/UploadStep'
 import ConcordanceStep from './components/ConcordanceStep'
 import GenerateStep from './components/GenerateStep'
@@ -6,7 +8,13 @@ import DownloadStep from './components/DownloadStep'
 import { analyzeDocuments, generateResource, ApiError } from './lib/api'
 import type { AnalyzeResponse, GeneratedResource, PedagogicalIntent } from './lib/types'
 
+type Modulo = 'menu' | 'validador' | 'generador'
 type Step = 1 | 2 | 3 | 4
+
+const MODULO_LABELS: Record<Exclude<Modulo, 'menu'>, string> = {
+  validador: 'Validador de Contenidos Curriculares',
+  generador: 'Generador de Contenidos Didácticos',
+}
 
 const STEP_LABELS: Record<Step, string> = {
   1: 'Cargar documentos',
@@ -42,6 +50,9 @@ function StepIndicator({ current }: { current: Step }) {
 }
 
 export default function App() {
+  const [modulo, setModulo] = useState<Modulo>('menu')
+  
+  // Validador State (Preserved when navigating to menu)
   const [step, setStep] = useState<Step>(1)
   const [analysis, setAnalysis] = useState<AnalyzeResponse | null>(null)
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
@@ -81,7 +92,7 @@ export default function App() {
     }
   }
 
-  function restart() {
+  function restartValidador() {
     setStep(1)
     setAnalysis(null)
     setSelectedWeek(null)
@@ -90,45 +101,77 @@ export default function App() {
     setGenerateError(null)
   }
 
+  // 1. Initial Menu Screen
+  if (modulo === 'menu') {
+    return <MenuInicial onSelect={setModulo} />
+  }
+
   const weeksList = analysis?.concordance.detalle_semanal || analysis?.concordance.weeks || []
   const selectedWeekTopic =
     (selectedWeek !== null && weeksList.find((w) => (w.semana ?? w.week_number) === selectedWeek)?.tema_silabo) || ''
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <h1 className="font-bold text-lg text-gray-900">Unidad Educativa Bilingüe Indoamérica</h1>
-          <p className="text-sm text-gray-500">Validador Pedagógico Curricular (Especificación v1.2)</p>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+      {/* Top Header with Back to Main Menu button */}
+      <header className="border-b border-slate-200" style={{ background: '#0a2f68' }}>
+        <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setModulo('menu')}
+              className="text-xs font-bold text-white/90 hover:text-white border border-white/30 hover:border-white/60 bg-white/10 rounded-xl px-3.5 py-2 transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <span>← Menú principal</span>
+            </button>
+            <div>
+              <h1 className="font-extrabold text-base sm:text-lg text-white">Unidad Educativa Bilingüe Indoamérica</h1>
+              <p className="text-xs font-bold" style={{ color: '#5ecfb1' }}>
+                {MODULO_LABELS[modulo]}
+              </p>
+            </div>
+          </div>
         </div>
       </header>
-      <StepIndicator current={step} />
-      <main className="px-4 pb-16">
-        {step === 1 && <UploadStep onSubmit={handleAnalyze} loading={analyzing} error={analyzeError} />}
-        {step === 2 && analysis && (
-          <ConcordanceStep
-            data={analysis}
-            onBack={restart}
-            onContinue={(weekNumber) => {
-              setSelectedWeek(weekNumber)
-              setStep(3)
-            }}
-          />
-        )}
-        {step === 3 && selectedWeek !== null && (
-          <GenerateStep
-            weekNumber={selectedWeek}
-            weekTopic={selectedWeekTopic}
-            loading={generating}
-            error={generateError}
-            onGenerate={handleGenerate}
-            onBack={() => setStep(2)}
-          />
-        )}
-        {step === 4 && resource && (
-          <DownloadStep resource={resource} onBack={() => setStep(3)} onRestart={restart} />
-        )}
-      </main>
+
+      {/* Module 2: Generador de Contenidos */}
+      {modulo === 'generador' && (
+        <main className="px-4 py-8 pb-16">
+          <GeneratorView />
+        </main>
+      )}
+
+      {/* Module 1: Validador de Contenidos (Preserved Flow) */}
+      {modulo === 'validador' && (
+        <>
+          <StepIndicator current={step} />
+          <main className="px-4 pb-16">
+            {step === 1 && <UploadStep onSubmit={handleAnalyze} loading={analyzing} error={analyzeError} />}
+            {step === 2 && analysis && (
+              <ConcordanceStep
+                data={analysis}
+                onBack={restartValidador}
+                onContinue={(weekNumber) => {
+                  setSelectedWeek(weekNumber)
+                  setStep(3)
+                }}
+              />
+            )}
+            {step === 3 && selectedWeek !== null && (
+              <GenerateStep
+                weekNumber={selectedWeek}
+                weekTopic={selectedWeekTopic}
+                loading={generating}
+                error={generateError}
+                onGenerate={handleGenerate}
+                onBack={() => setStep(2)}
+              />
+            )}
+            {step === 4 && resource && (
+              <DownloadStep resource={resource} onBack={() => setStep(3)} onRestart={restartValidador} />
+            )}
+          </main>
+        </>
+      )}
     </div>
   )
 }

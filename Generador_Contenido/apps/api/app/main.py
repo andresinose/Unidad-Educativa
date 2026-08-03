@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import CORS_ORIGINS
 from app.core.session import sweep_expired_sessions
-from app.routers import documents, generation, export
+from app.routers import documents, generation, export, materials
 
 
 @asynccontextmanager
@@ -33,6 +33,8 @@ app.add_middleware(
 app.include_router(documents.router)
 app.include_router(generation.router)
 app.include_router(export.router)
+app.include_router(materials.router)
+
 
 
 @app.get("/health")

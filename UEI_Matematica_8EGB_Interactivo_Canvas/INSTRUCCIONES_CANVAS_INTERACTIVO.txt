@@ -1,0 +1,35 @@
+MATERIAL INTERACTIVO UE INDOAMÉRICA - INSTALACIÓN EN CANVAS
+
+IMPORTANTE
+Canvas elimina JavaScript cuando se pega directamente en el editor de una Página. Por eso, no copie el contenido de index.html dentro del editor. Debe subir y expandir el ZIP, y luego incrustar el archivo index.html mediante un iframe o abrirlo como enlace.
+
+OPCIÓN A - DENTRO DE UNA PÁGINA DE CANVAS
+1. En Archivos, suba UEI_Matematica_8EGB_Interactivo_Canvas.zip.
+2. Cuando Canvas pregunte, elija Expandir/Descomprimir.
+3. Abra la carpeta creada y localice index.html.
+4. Abra index.html y copie la URL del archivo (no la URL de la vista previa completa de Canvas).
+5. Cree o edite una Página y cambie al editor HTML </>.
+6. Pegue:
+
+<iframe src="PEGUE_AQUÍ_LA_URL_DE_INDEX.HTML" style="width:100%;height:1100px;border:0" allow="fullscreen" loading="lazy"></iframe>
+
+7. Guarde, publique y pruebe en Vista del estudiante.
+
+OPCIÓN B - SCORM 1.2 (RECOMENDADA PARA CALIFICACIÓN)
+1. Esta opción requiere que la herramienta SCORM esté habilitada por el administrador de Canvas.
+2. Importe UEI_Matematica_8EGB_SCORM_1_2.zip desde SCORM.
+3. Seleccione importar como actividad o tarea calificada.
+4. El paquete enviará a Canvas el porcentaje de actividades autocorregibles correctas.
+
+FUNCIONES
+- Escribir directamente sobre cualquier espacio de la página.
+- Dibujar, subrayar/resaltar, encerrar y marcar.
+- Deshacer, rehacer y limpiar una página.
+- Guardado automático en el navegador.
+- Exportar e importar respuestas en JSON.
+- Actividades numéricas autocorregibles con botón Comprobar.
+- Botón Autocompletar para mostrar y colocar la solución.
+- Las preguntas abiertas se responden sobre la página o en el cuaderno de notas y requieren revisión docente.
+
+NOTA SOBRE GUARDADO
+En la versión incrustada, las respuestas se conservan en el navegador y dispositivo utilizados. Para trasladarlas a otro equipo, use Exportar e Importar. En SCORM, la calificación se reporta a Canvas, pero los trazos y textos continúan almacenándose localmente.
