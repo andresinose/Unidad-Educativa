@@ -182,6 +182,59 @@ def _study_guide_slide(prs: Presentation, block) -> None:
             kp.font.color.rgb = RGBColor(146, 64, 14)
 
 
+def _diagram_slide(prs: Presentation, block) -> None:
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+
+    title = block.title or "Esquema / Mapa Conceptual"
+    header_box = slide.shapes.add_textbox(Pt(30), Pt(15), Pt(650), Pt(35))
+    tf = header_box.text_frame
+    p = tf.paragraphs[0]
+    p.text = f"🗺️ {title}"
+    p.font.size = Pt(20)
+    p.font.bold = True
+
+    nodes = block.payload.get("nodes", [])
+    if not nodes:
+        return
+
+    n_nodes = len(nodes)
+    cols = min(3, max(1, n_nodes))
+    w_card = Pt(200)
+    h_card = Pt(90)
+
+    for i, node in enumerate(nodes[:6]):
+        row = i // cols
+        col = i % cols
+        left = Pt(30 + col * 225)
+        top = Pt(65 + row * 115)
+
+        shape = slide.shapes.add_shape(1, left, top, w_card, h_card)
+        shape.fill.solid()
+        ntype = node.get("node_type", "concept")
+
+        if ntype == "concept":
+            shape.fill.fore_color.rgb = RGBColor(238, 246, 255)
+            shape.line.color.rgb = RGBColor(59, 130, 246)
+        elif ntype == "process":
+            shape.fill.fore_color.rgb = RGBColor(240, 253, 244)
+            shape.line.color.rgb = RGBColor(34, 197, 94)
+        elif ntype == "example":
+            shape.fill.fore_color.rgb = RGBColor(254, 243, 199)
+            shape.line.color.rgb = RGBColor(245, 158, 11)
+        else:
+            shape.fill.fore_color.rgb = RGBColor(243, 232, 255)
+            shape.line.color.rgb = RGBColor(168, 85, 247)
+
+        shape.line.width = Pt(1.5)
+        stf = shape.text_frame
+        stf.word_wrap = True
+        p0 = stf.paragraphs[0]
+        p0.text = node.get("label", "")
+        p0.font.size = Pt(11)
+        p0.font.bold = True
+        p0.font.color.rgb = RGBColor(15, 23, 42)
+
+
 def export_pptx(resource: GeneratedResource) -> bytes:
     prs = Presentation()
     _title_slide(prs, resource)
@@ -199,14 +252,7 @@ def export_pptx(resource: GeneratedResource) -> bytes:
         elif block.type == ResourceBlockType.study_guide:
             _study_guide_slide(prs, block)
         elif block.type == ResourceBlockType.diagram:
-            nodes = block.payload.get("nodes", [])
-            edges = block.payload.get("edges", [])
-            bullets = [n.get("label", "") for n in nodes]
-            bullets += [
-                f"{e.get('source')} → {e.get('target')}" + (f" ({e.get('label')})" if e.get("label") else "")
-                for e in edges
-            ]
-            _bullet_slide(prs, block.title or "Diagrama", bullets)
+            _diagram_slide(prs, block)
         else:
             _bullet_slide(prs, block.title or "Recurso", [block.title or ""])
 

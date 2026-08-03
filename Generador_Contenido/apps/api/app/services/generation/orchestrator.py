@@ -122,7 +122,15 @@ def _build_prompt(week: SilaboWeek, concordance: WeekConcordance, request: Gener
     elif any(k in extra_lower for k in ["guia", "ficha de estudio", "resumen", "infografia"]):
         tool_guidance = "El docente solicitó una GUÍA DE ESTUDIO / RESUMEN. DEBES invocar la herramienta `build_study_guide`."
     elif any(k in intent_str.lower() for k in ["presentar", "visualizar", "comparar", "analizar"]) or any(k in extra_lower for k in ["proceso", "mapa", "diagrama", "esquema", "flujo"]):
-        tool_guidance = "El docente solicita un RECURSO VISUAL ESQUEMÁTICO. DEBES invocar la herramienta `render_diagram`."
+        tool_guidance = (
+            "El docente solicita un RECURSO VISUAL DIDÁCTICO SINTÉTICO (mapa conceptual / esquema de aprendizaje).\n"
+            "INSTRUCCIÓN DIDÁCTICA DE SIMPLIFICACIÓN PARA EL APRENDIZAJE:\n"
+            "- DEBES invocar la herramienta `render_diagram`.\n"
+            "- Para que sea didácticamente efectivo y fácil de aprender por estudiantes, genera entre 4 y 6 NODOS CLAVE MÁXIMO en una secuencia de aprendizaje clara:\n"
+            "  (1. Tema Central ➔ 2. Regla / Paso Principal ➔ 3. Ejemplo Práctico ➔ 4. Conclusión / Resultado).\n"
+            "- Mantiene labels sintéticos, breves y sin red compleja de líneas cruzadas.\n"
+            "- Asigna 'node_type' adecuado ('concept', 'process', 'example', 'outcome') para cada nodo."
+        )
     else:
         tool_guidance = "Elige la herramienta MCP más apropiada según la intención pedagógica (`build_interactive_activity`, `render_diagram`, `build_word_search`, `build_flashcards`, o `build_study_guide`)."
 

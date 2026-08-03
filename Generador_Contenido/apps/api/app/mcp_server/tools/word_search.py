@@ -1,7 +1,8 @@
 """build_word_search — interactive word search puzzle tool.
 
 Generates a grid-based word search puzzle with self-contained HTML/CSS/JS.
-Students can click cells to select letters and find key terms from the week's topic.
+Students can click letter cells or click sidebar words directly to find/cross out key terms.
+100% compatible with React dangerouslySetInnerHTML and Canvas LMS.
 """
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ class WordSearchItem(BaseModel):
 
 class WordSearchSchema(BaseModel):
     title: str = "Sopa de Letras"
-    instructions: str = "Encuentra las palabras clave en la sopa de letras haciendo clic en las celdas."
+    instructions: str = "Encuentra las palabras en la sopa de letras seleccionando las celdas o haciendo clic sobre las palabras de la lista para tacharlas."
     words: list[str] = Field(min_length=3, max_length=15)
     grid_size: int = 12
 
@@ -98,22 +99,20 @@ def build_word_search(schema: WordSearchSchema) -> str:
     actual_size = len(grid)
     uid = f"ws_{abs(hash((schema.title, len(placed_words)))) % 100000}"
 
-    words_json = json.dumps(placed_words, ensure_ascii=False)
-
-    # Pre-render grid cells in static HTML so React dangerouslySetInnerHTML displays them IMMEDIATELY!
+    # Pre-render grid cells with inline onclick
     grid_cells_html = []
     for r in range(actual_size):
         for c in range(actual_size):
             letter = grid[r][c]
             grid_cells_html.append(
-                f'<div class="uei-ws-cell" data-r="{r}" data-c="{c}" data-letter="{html.escape(letter)}">{html.escape(letter)}</div>'
+                f'<div class="uei-ws-cell" data-r="{r}" data-c="{c}" data-letter="{html.escape(letter)}" onclick="ueiWsClickCell(this, \'{uid}\')">{html.escape(letter)}</div>'
             )
 
-    # Pre-render word list in static HTML
+    # Pre-render word list in static HTML with inline onclick to toggle done state
     word_items_html = []
     for w in placed_words:
         word_items_html.append(
-            f'<li class="uei-ws-item" id="{uid}_word_{w}">{html.escape(w)}</li>'
+            f'<li class="uei-ws-item" id="{uid}_word_{w}" onclick="ueiWsClickItem(this, \'{uid}\', \'{w}\')" title="Haz clic para tachar la palabra">{html.escape(w)}</li>'
         )
 
     grid_markup = "\n".join(grid_cells_html)
@@ -132,6 +131,7 @@ def build_word_search(schema: WordSearchSchema) -> str:
     </div>
     <div class="uei-ws-sidebar">
       <h4>Palabras a buscar (<span id="{uid}_found_count">0</span>/{len(placed_words)})</h4>
+      <p class="uei-ws-hint-sm">💡 Puedes tachar las palabras haciendo clic directamente sobre ellas en esta lista o en el tablero.</p>
       <ul class="uei-ws-list" id="{uid}_list">
 {list_markup}
       </ul>
@@ -153,70 +153,47 @@ def build_word_search(schema: WordSearchSchema) -> str:
   .uei-ws-cell.found {{ background: #22c55e; color: #ffffff; border-color: #16a34a; }}
   .uei-ws-sidebar {{ flex: 1; min-width: 220px; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; }}
   .uei-ws-sidebar h4 {{ margin-top: 0; color: #1e293b; font-size: 1rem; border-bottom: 2px solid #cbd5e1; padding-bottom: 8px; }}
+  .uei-ws-hint-sm {{ font-size: 0.78rem; color: #64748b; margin: 4px 0 12px; line-height: 1.3; }}
   .uei-ws-list {{ list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto; }}
-  .uei-ws-item {{ padding: 6px 12px; background: #ffffff; border-radius: 6px; font-weight: 600; font-size: 0.88rem; color: #475569; border: 1px solid #cbd5e1; transition: all 0.2s ease; }}
-  .uei-ws-item.done {{ background: #dcfce7; color: #166534; border-color: #86efac; text-decoration: line-through; opacity: 0.8; }}
+  .uei-ws-item {{ padding: 8px 12px; background: #ffffff; border-radius: 6px; font-weight: 600; font-size: 0.9rem; color: #475569; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s ease; user-select: none; display: flex; align-items: center; justify-content: space-between; }}
+  .uei-ws-item:hover {{ background: #e2e8f0; color: #1e293b; border-color: #94a3b8; }}
+  .uei-ws-item.done {{ background: #dcfce7; color: #166534; border-color: #86efac; text-decoration: line-through; opacity: 0.85; }}
+  .uei-ws-item.done::after {{ content: "✓"; font-weight: 800; color: #166534; float: right; margin-left: 8px; }}
   .uei-ws-status {{ margin-top: 16px; font-weight: 700; color: #16a34a; text-align: center; font-size: 1.1rem; }}
 </style>
 
 <script>
-(function() {{
-  var container = document.getElementById("{uid}");
-  if (!container) return;
-  var targetWords = JSON.parse({words_json});
-  var statusEl = document.getElementById("{uid}_status");
-  var foundCountEl = document.getElementById("{uid}_found_count");
-
-  var selectedCells = [];
-  var foundWords = [];
-
-  var cells = container.querySelectorAll(".uei-ws-cell");
-  cells.forEach(function(cell) {{
-    cell.addEventListener("click", function() {{
-      var r = cell.dataset.r;
-      var c = cell.dataset.c;
-      var letter = cell.dataset.letter;
-      handleCellClick(cell, r, c, letter);
-    }});
-  }});
-
-  function handleCellClick(cell, r, c, letter) {{
-    if (cell.classList.contains("found")) return;
-    
-    var idx = selectedCells.findIndex(function(item) {{ return item.r === r && item.c === c; }});
-    if (idx >= 0) {{
-      cell.classList.remove("selected");
-      selectedCells.splice(idx, 1);
-    }} else {{
-      cell.classList.add("selected");
-      selectedCells.push({{ r: r, c: c, letter: letter, el: cell }});
-    }}
-
-    checkSelectedWord();
-  }}
-
-  function checkSelectedWord() {{
-    var word = selectedCells.map(function(item) {{ return item.letter; }}).join("");
-    var revWord = word.split("").reverse().join("");
-
-    var matched = targetWords.find(function(w) {{ return (w === word || w === revWord) && !foundWords.includes(w); }});
-    if (matched) {{
-      foundWords.push(matched);
-      selectedCells.forEach(function(item) {{
-        item.el.classList.remove("selected");
-        item.el.classList.add("found");
-      }});
-      selectedCells = [];
-
-      var itemEl = document.getElementById("{uid}_word_" + matched);
-      if (itemEl) itemEl.classList.add("done");
-
-      foundCountEl.textContent = foundWords.length;
-      if (foundWords.length === targetWords.length) {{
-        statusEl.textContent = "🎉 ¡Felicidades! Has encontrado todas las palabras.";
+if (typeof window.ueiWsClickItem !== 'function') {{
+  window.ueiWsClickItem = function(itemEl, uid, word) {{
+    itemEl.classList.toggle("done");
+    var container = document.getElementById(uid);
+    if (!container) return;
+    var doneItems = container.querySelectorAll(".uei-ws-item.done");
+    var countEl = document.getElementById(uid + "_found_count");
+    var totalItems = container.querySelectorAll(".uei-ws-item").length;
+    if (countEl) countEl.textContent = doneItems.length;
+    var statusEl = document.getElementById(uid + "_status");
+    if (statusEl) {{
+      if (doneItems.length === totalItems) {{
+        statusEl.textContent = "🎉 ¡Felicidades! Has encontrado todas las palabras de la lista.";
+      }} else {{
+        statusEl.textContent = "";
       }}
     }}
-  }}
-}})();
+  }};
+}}
+
+if (typeof window.ueiWsClickCell !== 'function') {{
+  window.ueiWsClickCell = function(cellEl, uid) {{
+    if (cellEl.classList.contains("found")) {{
+      cellEl.classList.remove("found");
+    }} else if (cellEl.classList.contains("selected")) {{
+      cellEl.classList.remove("selected");
+      cellEl.classList.add("found");
+    }} else {{
+      cellEl.classList.add("selected");
+    }}
+  }};
+}}
 </script>
 """.strip()
