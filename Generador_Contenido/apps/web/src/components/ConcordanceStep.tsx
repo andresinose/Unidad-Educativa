@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { AnalyzeResponse, DetalleSemanal } from '../lib/types'
+import { exportConcordancePdf } from '../lib/api'
 
 interface Props {
   data: AnalyzeResponse
@@ -54,9 +55,21 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 export default function ConcordanceStep({ data, onContinue, onBack }: Props) {
   const { silabo, guia, concordance } = data
   const [expandedWeeks, setExpandedWeeks] = useState<Record<number, boolean>>({})
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
 
   const toggleWeek = (wn: number) => {
     setExpandedWeeks((prev) => ({ ...prev, [wn]: !prev[wn] }))
+  }
+
+  const handleExportPdf = async () => {
+    try {
+      setIsDownloadingPdf(true)
+      await exportConcordancePdf(data)
+    } catch (err) {
+      alert('Error al descargar el PDF: ' + (err instanceof Error ? err.message : String(err)))
+    } finally {
+      setIsDownloadingPdf(false)
+    }
   }
 
   const veredictoGlobalKey = concordance.veredicto_global || (concordance.missing_count === 0 ? 'CUMPLE' : 'CUMPLE_PARCIAL')
@@ -74,6 +87,16 @@ export default function ConcordanceStep({ data, onContinue, onBack }: Props) {
           <p className="text-gray-600 text-sm mt-1">
             Análisis de trazabilidad semana a semana y cobertura de subtemas atómicos.
           </p>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              disabled={isDownloadingPdf}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-lg shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+            >
+              <span>📄</span> {isDownloadingPdf ? 'Generando PDF...' : 'Descargar Reporte en PDF'}
+            </button>
+          </div>
         </div>
 
         {/* Sello de Veredicto Global (Elemento firma de la UI: recuadro doble borde con ligera rotación) */}

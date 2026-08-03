@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { INTENTS, type PedagogicalIntent } from '../lib/types'
+import CanvasTaskGenerator from './CanvasTaskGenerator'
 
 const INTENT_LABELS: Record<PedagogicalIntent, string> = {
   presentar: 'Presentar el tema',
@@ -28,13 +29,36 @@ interface Props {
 export default function GenerateStep({ weekNumber, weekTopic, loading, error, onGenerate, onBack }: Props) {
   const [intent, setIntent] = useState<PedagogicalIntent | null>(null)
   const [extra, setExtra] = useState('')
+  const [isTaskMode, setIsTaskMode] = useState(false)
+
+  if (isTaskMode) {
+    return (
+      <CanvasTaskGenerator
+        initialTitle={`Tarea Semana ${weekNumber}: ${weekTopic}`}
+        initialIndicaciones={`1. Revisa detenidamente el contenido planificado para la Semana ${weekNumber} (${weekTopic}).\n2. Desarrolla las actividades propuestas en tu cuaderno.\n3. Asegúrate de presentar tus respuestas de forma clara y ordenada.`}
+        onBack={() => setIsTaskMode(false)}
+      />
+    )
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-1">Generar recurso didáctico</h1>
-      <p className="text-gray-600 mb-6">
-        Semana {weekNumber} — {weekTopic}
-      </p>
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">Generar recurso didáctico</h1>
+          <p className="text-gray-600">
+            Semana {weekNumber} — {weekTopic}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsTaskMode(true)}
+          className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+        >
+          <span>📝 Crear Tarea Canvas Formateada</span>
+        </button>
+      </div>
 
       <label className="block font-medium mb-2">¿Qué desea lograr con este recurso?</label>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">

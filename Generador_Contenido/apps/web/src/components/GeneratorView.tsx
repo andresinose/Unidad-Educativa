@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { downloadMaterial, downloadMaterialZip, getConversionJob, listMaterials, materialPreviewUrl, uploadMaterialPdf } from '../lib/api'
 import type { ConversionJob, Material } from '../lib/types'
+import CanvasTaskGenerator from './CanvasTaskGenerator'
 
 export default function GeneratorView() {
+  const [mode, setMode] = useState<'pdf' | 'tarea'>('pdf')
   const [file, setFile] = useState<File | null>(null)
   const [job, setJob] = useState<ConversionJob | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -79,6 +81,32 @@ export default function GeneratorView() {
     }
   }
 
+  if (mode === 'tarea') {
+    return (
+      <div className="space-y-4">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 border border-slate-200">
+            <button
+              type="button"
+              onClick={() => setMode('pdf')}
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition-all"
+            >
+              📄 Conversor de PDF a HTML
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('tarea')}
+              className="px-4 py-2 bg-white rounded-xl text-xs font-bold text-slate-900 shadow-xs cursor-pointer transition-all"
+            >
+              📝 Generador de Tareas Canvas
+            </button>
+          </div>
+        </div>
+        <CanvasTaskGenerator onBack={() => setMode('pdf')} />
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Module Title Banner */}
@@ -87,10 +115,31 @@ export default function GeneratorView() {
           <span className="px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold uppercase tracking-wider">
             Generador de Contenidos Didácticos
           </span>
-          <h2 className="text-2xl font-extrabold text-slate-900 mt-2">Conversor de PDF a HTML Interactivo</h2>
+          <h2 className="text-2xl font-extrabold text-slate-900 mt-2">Herramientas Didácticas para Canvas LMS</h2>
           <p className="text-sm text-slate-600 mt-1">
-            Sube un libro o folleto en PDF. Claude transcribirá su estructura a bloques interactivos con autoguardado y ejercicios.
+            Convierte libros en PDF o genera Tareas oficiales formateadas con el encabezado institucional UEI.
           </p>
+        </div>
+
+        <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1 border border-slate-200">
+          <button
+            type="button"
+            onClick={() => setMode('pdf')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              mode === 'pdf' ? 'bg-blue-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            📄 Conversor de PDF
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('tarea')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              mode === 'tarea' ? 'bg-blue-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            📝 Crear Tarea Canvas
+          </button>
         </div>
       </div>
 

@@ -19,13 +19,14 @@ def test_reproduces_manually_validated_findings():
     result = _real_result()
     by_week = {w.week_number: w for w in result.weeks}
 
-    for wn in range(5):
+    for wn in (1, 2, 3, 4):
         assert by_week[wn].status == "CONCORDANTE", f"week {wn}"
-    for wn in (5, 6):
-        assert by_week[wn].status == "FALTANTE_EN_GUIA", f"week {wn}"
+    assert by_week[5].status == "FALTANTE_EN_GUIA", "week 5"
+    assert 0 not in by_week
+    assert 6 not in by_week
 
-    assert result.concordant_count == 5
-    assert result.missing_count == 2
+    assert result.concordant_count == 4
+    assert result.missing_count == 1
     assert result.partial_count == 0
 
     for week in result.weeks:
@@ -36,7 +37,7 @@ def test_reproduces_manually_validated_findings():
 def test_key_findings_mention_missing_weeks_and_adaptation_gap():
     result = _real_result()
     joined = " ".join(result.key_findings)
-    assert "5" in joined and "6" in joined
+    assert "5" in joined
     assert "adapta" in joined.lower()
 
 

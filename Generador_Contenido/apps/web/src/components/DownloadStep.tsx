@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { GeneratedResource } from '../lib/types'
-import { exportHtml, exportPptx } from '../lib/api'
+import { exportHtml, exportPdf, exportPptx } from '../lib/api'
 
 interface Props {
   resource: GeneratedResource
@@ -16,15 +16,17 @@ function buildPreviewHtml(resource: GeneratedResource): string {
 }
 
 export default function DownloadStep({ resource, onBack, onRestart }: Props) {
-  const [busy, setBusy] = useState<'html' | 'pptx' | null>(null)
+  const [busy, setBusy] = useState<'html' | 'pptx' | 'pdf' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const previewSrcDoc = useMemo(() => buildPreviewHtml(resource), [resource])
 
-  async function handleExport(kind: 'html' | 'pptx') {
+  async function handleExport(kind: 'html' | 'pptx' | 'pdf') {
     setBusy(kind)
     setError(null)
     try {
-      await (kind === 'html' ? exportHtml(resource) : exportPptx(resource))
+      if (kind === 'html') await exportHtml(resource)
+      else if (kind === 'pptx') await exportPptx(resource)
+      else await exportPdf(resource)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo exportar el recurso.')
     } finally {
@@ -57,7 +59,7 @@ export default function DownloadStep({ resource, onBack, onRestart }: Props) {
         <button
           type="button"
           disabled={busy !== null}
-          className="rounded-lg bg-blue-600 text-white px-5 py-2.5 font-medium disabled:bg-gray-300 hover:bg-blue-700"
+          className="rounded-lg bg-blue-600 text-white px-5 py-2.5 font-medium disabled:bg-gray-300 hover:bg-blue-700 cursor-pointer"
           onClick={() => handleExport('html')}
         >
           {busy === 'html' ? 'Descargando…' : '⬇ Descargar HTML para Canvas'}
@@ -65,7 +67,15 @@ export default function DownloadStep({ resource, onBack, onRestart }: Props) {
         <button
           type="button"
           disabled={busy !== null}
-          className="rounded-lg bg-white border border-gray-300 px-5 py-2.5 font-medium disabled:opacity-50 hover:bg-gray-50"
+          className="rounded-lg bg-emerald-600 text-white px-5 py-2.5 font-medium disabled:opacity-50 hover:bg-emerald-700 cursor-pointer"
+          onClick={() => handleExport('pdf')}
+        >
+          {busy === 'pdf' ? 'Descargando…' : '⬇ Descargar PDF'}
+        </button>
+        <button
+          type="button"
+          disabled={busy !== null}
+          className="rounded-lg bg-white border border-gray-300 px-5 py-2.5 font-medium disabled:opacity-50 hover:bg-gray-50 cursor-pointer"
           onClick={() => handleExport('pptx')}
         >
           {busy === 'pptx' ? 'Descargando…' : '⬇ Descargar PPTX'}

@@ -77,6 +77,7 @@ async function downloadBlob(path: string, resource: GeneratedResource, fallbackN
 
 export const exportHtml = (resource: GeneratedResource) => downloadBlob('/export/html', resource, 'recurso.html')
 export const exportPptx = (resource: GeneratedResource) => downloadBlob('/export/pptx', resource, 'recurso.pptx')
+export const exportPdf = (resource: GeneratedResource) => downloadBlob('/export/pdf', resource, 'recurso.pdf')
 
 export async function listMaterials(): Promise<import('./types').Material[]> {
   const res = await fetch(`${BASE}/materials`)
@@ -119,6 +120,29 @@ export async function downloadMaterialZip(material: import('./types').Material) 
   const a = document.createElement('a')
   a.href = url
   a.download = `material_${material.id}.zip`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
+export async function exportConcordancePdf(data: AnalyzeResponse) {
+  const res = await fetch(`${BASE}/export/pdf-concordance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    throw new ApiError(res.statusText, res.status)
+  }
+  const blob = await res.blob()
+  const disposition = res.headers.get('Content-Disposition') || ''
+  const match = /filename="([^"]+)"/.exec(disposition)
+  const filename = match ? match[1] : 'reporte_validacion_curricular.pdf'
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
   document.body.appendChild(a)
   a.click()
   a.remove()

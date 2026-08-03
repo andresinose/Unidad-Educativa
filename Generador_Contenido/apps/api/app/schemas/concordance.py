@@ -90,10 +90,10 @@ class DetalleSemanal(BaseModel):
 
     @property
     def status(self) -> str:
-        if not self.desarrollada_en_material:
-            return "FALTANTE_EN_GUIA"
         if self.veredicto_semana in (ConcordanceStatus.CUMPLE, ConcordanceStatus.CONCORDANTE):
             return "CONCORDANTE"
+        if not self.desarrollada_en_material:
+            return "FALTANTE_EN_GUIA"
         elif self.veredicto_semana in (ConcordanceStatus.CUMPLE_PARCIAL, ConcordanceStatus.PARCIAL):
             return "PARCIAL"
         return "NO_CUMPLE"

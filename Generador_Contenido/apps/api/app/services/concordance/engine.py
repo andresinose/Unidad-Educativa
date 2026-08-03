@@ -1,4 +1,5 @@
-"""Concordance Engine according to Spec v1.2.
+"""Concordance Engine according to Spec v1.2 with institutional exclusions.
+Week 0 (Diagnóstico/Nivelación) and Final Week (Cierre/Evaluación) are completely excluded from the validation run.
 """
 from __future__ import annotations
 
@@ -25,12 +26,22 @@ UMBRAL_MATCH = 0.5
 
 
 def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: str | None = None) -> ConcordanceResult:
-    # 1. Descomposición de subtemas
-    subtemas_dict = descomponer_subtemas_batch(silabo.weeks, api_key)
+    # 1. Identificar semanas evaluables excluyendo Semana 0 y Semana Final por directiva institucional
+    all_week_numbers = [w.week_number for w in silabo.weeks]
+    max_week = max(all_week_numbers) if all_week_numbers else -1
+
+    semanas_evaluables = [
+        w for w in silabo.weeks
+        if w.week_number != 0 and (len(all_week_numbers) <= 2 or w.week_number != max_week)
+    ]
+    if not semanas_evaluables:
+        semanas_evaluables = silabo.weeks
+
+    # 2. Descomposición de subtemas únicamente para semanas evaluables
+    subtemas_dict = descomponer_subtemas_batch(semanas_evaluables, api_key)
 
     dev_by_week = {w.numero: w for w in guia.semanas_desarrolladas}
     
-    # Sintetizar GuiaWeekDeveloped sintético para semanas detectadas sin registro detallado
     for wn in guia.weeks_detected:
         if wn not in dev_by_week:
             codes = guia.competency_codes_by_week.get(wn, [])
@@ -43,7 +54,7 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
     dudosos_list: list[dict] = []
     matriz_preliminar: dict[int, list[dict]] = {}
 
-    for w in silabo.weeks:
+    for w in semanas_evaluables:
         wn = w.week_number
         subs = subtemas_dict.get(wn, [])
         g_week = dev_by_week.get(wn)
@@ -77,7 +88,6 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
                         if "sintesis" not in hallado_en or sim > hallado_en["sintesis"][0]:
                             hallado_en["sintesis"] = (sim, ev_str)
 
-                # Si no hay periodos titulados explícitos en la guía (ej. semana 0 diagnóstico), pero hay secciones desarrolladas en esa semana
                 sec_types = [s.section_type for s in guia.sections if s.week_number == wn]
                 if not hallado_en and sec_types:
                     ev_str = f"Secciones en guía — {', '.join(sec_types[:3])}"
@@ -114,14 +124,14 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
     # 3. Llamar Juez LLM si hay dudosos
     resoluciones_llm = resolver_dudosos_batch(dudosos_list, api_key) if dudosos_list else {}
 
-    # 4. Construir DetalleSemanal
+    # 4. Construir DetalleSemanal para las semanas evaluables
     detalle_semanal: list[DetalleSemanal] = []
     temas_validados: list[TemaValidado] = []
     
     semanas_mencionadas = guia.semanas_mencionadas or sorted(guia.weeks_detected)
     solo_mencionadas = [w for w in semanas_mencionadas if w not in guia.weeks_detected]
 
-    for w in silabo.weeks:
+    for w in semanas_evaluables:
         wn = w.week_number
         g_week = dev_by_week.get(wn)
         desarrollada = (wn in guia.weeks_detected)
@@ -150,7 +160,7 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
             matriz_sub = MatrizSubtemas(cobertura=0.0, cubiertos=0, total=len(subs), subtemas=subtemas_ev)
 
             if wn in solo_mencionadas:
-                obs = f"La semana {wn} ('{w.topic}') aparece en la Ruta del Parcial pero no tiene desarrollo en el material (lecciones, actividades ni evaluación)."
+                obs = f"La semana {wn} ('{w.topic}') aparece en la Ruta del Parcial pero no tiene desarrollo en el material."
             else:
                 obs = f"La semana {wn} ('{w.topic}') está definida en el sílabo pero no está desarrollada en el material."
             observaciones.append(obs)
@@ -173,7 +183,6 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
                 ev = item["evidencia"]
                 fuentes = item["fuentes"]
 
-                # Aplicar resolución del juez LLM si aplica
                 llm_key = (wn, sub.lower())
                 if llm_key in resoluciones_llm:
                     res_llm = resoluciones_llm[llm_key]
@@ -206,7 +215,6 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
                 enriquecimiento=enriquecimiento
             )
 
-            # Determinar veredicto según cobertura y coincidencia de códigos
             if cobertura >= 0.80 and not missing_codes:
                 veredicto_sem = ConcordanceStatus.CUMPLE
             elif cobertura >= 0.50 or (missing_codes and len(guia_codes) > 0):
@@ -292,9 +300,9 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
                 )
             )
 
-    # 5. Veredicto Global
+    # 5. Veredicto Global sobre las semanas evaluables
     n_total = len(detalle_semanal)
-    n_cumple = sum(1 for d in detalle_semanal if d.status == "CONCORDANTE")
+    n_cumple = sum(1 for d in detalle_semanal if d.veredicto_semana in (ConcordanceStatus.CUMPLE, ConcordanceStatus.CONCORDANTE))
 
     if n_total > 0 and n_cumple == n_total:
         v_global = ConcordanceStatus.CUMPLE
@@ -304,7 +312,7 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
         v_global = ConcordanceStatus.NO_CUMPLE
 
     n_dev = len([d for d in detalle_semanal if d.desarrollada_en_material])
-    resumen_str = f"{n_cumple} de {n_total} semanas cumplen. Desarrolladas en el material: {n_dev}/{n_total}."
+    resumen_str = f"{n_cumple} de {n_total} semanas lectivas evaluables cumplen el estándar de concordancia. Desarrolladas en el material: {n_dev}/{n_total}."
     if solo_mencionadas:
         resumen_str += f" Solo mencionadas: {solo_mencionadas}."
 
@@ -329,6 +337,7 @@ def build_concordance(silabo: SilaboExtraction, guia: GuiaExtraction, api_key: s
             "docente": silabo.teacher,
             "fechas_silabo": f"{silabo.start_date} - {silabo.end_date}",
             "fechas_material": guia.fechas,
-            "juez_llm": bool(api_key)
+            "juez_llm": bool(api_key),
+            "semanas_excluidas": [0, max_week] if len(all_week_numbers) > 2 else [0]
         }
     )
