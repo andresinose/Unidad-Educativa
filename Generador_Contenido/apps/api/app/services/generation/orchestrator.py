@@ -23,6 +23,8 @@ from app.mcp_server.tools.diagram import DiagramSchema, render_diagram
 from app.mcp_server.tools.word_search import WordSearchSchema, build_word_search
 from app.mcp_server.tools.flashcards import FlashcardsSchema, build_flashcards
 from app.mcp_server.tools.study_guide import StudyGuideSchema, build_study_guide
+from app.mcp_server.tools.crossword import CrosswordSchema, build_crossword
+from app.mcp_server.tools.logic_puzzle import LogicPuzzleSchema, build_logic_puzzle
 
 from app.schemas.concordance import WeekConcordance
 from app.schemas.extraction import SilaboWeek
@@ -69,6 +71,22 @@ _TOOL_SPECS = [
         ),
         "input_schema": StudyGuideSchema.model_json_schema(),
     },
+    {
+        "name": "build_crossword",
+        "description": (
+            "Crea un crucigrama interactivo autónomo en HTML/CSS con grilla y pistas horizontales/verticales, "
+            "excelente para reforzar conceptos, definiciones y vocabulario mediante razonamiento y pistas."
+        ),
+        "input_schema": CrosswordSchema.model_json_schema(),
+    },
+    {
+        "name": "build_logic_puzzle",
+        "description": (
+            "Crea un rompecabezas de lógica (emparejar columnas o clasificar secuencia lógica de pasos) "
+            "interactivo en HTML/CSS/JS, ideal para pensamiento crítico y secuenciación."
+        ),
+        "input_schema": LogicPuzzleSchema.model_json_schema(),
+    },
 ]
 
 _TOOL_IMPLS: dict[str, tuple[type, callable, ResourceBlockType]] = {
@@ -77,6 +95,8 @@ _TOOL_IMPLS: dict[str, tuple[type, callable, ResourceBlockType]] = {
     "build_word_search": (WordSearchSchema, build_word_search, ResourceBlockType.word_search),
     "build_flashcards": (FlashcardsSchema, build_flashcards, ResourceBlockType.flashcards),
     "build_study_guide": (StudyGuideSchema, build_study_guide, ResourceBlockType.study_guide),
+    "build_crossword": (CrosswordSchema, build_crossword, ResourceBlockType.crossword),
+    "build_logic_puzzle": (LogicPuzzleSchema, build_logic_puzzle, ResourceBlockType.logic_puzzle),
 }
 
 
@@ -110,12 +130,23 @@ def _anonymized_adaptations_summary(week: SilaboWeek) -> str:
     )
 
 
-def _build_prompt(week: SilaboWeek, concordance: WeekConcordance, request: GenerationRequest) -> str:
-    status_str = getattr(concordance.status, "value", str(concordance.status))
+def _build_prompt(
+    week: SilaboWeek,
+    concordance: WeekConcordance | None,
+    request: GenerationRequest,
+    forced_tool: str | None = None,
+) -> str:
+    status_obs = f"{getattr(concordance.status, 'value', str(concordance.status))} — {concordance.observation}" if concordance else "(sin concordancia evaluada)"
     intent_str = getattr(request.intent, "value", str(request.intent))
     extra_lower = (request.extra_instructions or "").lower()
 
-    if any(k in extra_lower for k in ["sopa", "letras", "juego", "ludico", "crucigrama"]):
+    if forced_tool and forced_tool in _TOOL_IMPLS:
+        tool_guidance = f"DEBES invocar la herramienta `{forced_tool}`."
+    elif any(k in extra_lower for k in ["crucigrama"]):
+        tool_guidance = "El docente solicitó un CRUCIGRAMA. DEBES invocar la herramienta `build_crossword`."
+    elif any(k in extra_lower for k in ["logica", "rompecabezas", "emparejar", "relacionar", "secuencia", "ordenar"]):
+        tool_guidance = "El docente solicitó un ROMPECABEZAS DE LÓGICA Y RELACIÓN. DEBES invocar la herramienta `build_logic_puzzle`."
+    elif any(k in extra_lower for k in ["sopa", "letras", "juego", "ludico"]):
         tool_guidance = "El docente solicitó una actividad LÚDICA (sopa de letras). DEBES invocar la herramienta `build_word_search`."
     elif any(k in extra_lower for k in ["tarjetas", "flashcard", "memorizar", "fichas", "memoria"]):
         tool_guidance = "El docente solicitó TARJETAS DE ESTUDIO (flashcards). DEBES invocar la herramienta `build_flashcards`."
@@ -132,7 +163,7 @@ def _build_prompt(week: SilaboWeek, concordance: WeekConcordance, request: Gener
             "- Asigna 'node_type' adecuado ('concept', 'process', 'example', 'outcome') para cada nodo."
         )
     else:
-        tool_guidance = "Elige la herramienta MCP más apropiada según la intención pedagógica (`build_interactive_activity`, `render_diagram`, `build_word_search`, `build_flashcards`, o `build_study_guide`)."
+        tool_guidance = "Elige la herramienta MCP más apropiada según la intención pedagógica (`build_interactive_activity`, `render_diagram`, `build_word_search`, `build_flashcards`, `build_study_guide`, `build_crossword`, o `build_logic_puzzle`)."
 
     return f"""Eres un asistente pedagógico experto en diseño instruccional y gamificación. Genera UN recurso didáctico para la siguiente semana de
 planificación curricular, usando EXCLUSIVAMENTE una de las herramientas MCP disponibles — nunca
@@ -143,7 +174,7 @@ Semana {week.week_number}: {week.topic}
 Códigos de competencia: {', '.join(week.competency_codes) or '(sin códigos)'}
 Contenido central de la clase (fase de construcción): {week.methodology_phases.construccion or '(no especificada)'}
 Nivel de logro esperado: {week.achievement_level or '(no especificado)'}
-Estado de concordancia con la guía didáctica: {status_str} — {concordance.observation}
+Estado de concordancia con la guía didáctica: {status_obs}
 
 Adaptaciones curriculares registradas para esta semana (identificadores ya anonimizados; ten en
 cuenta estas necesidades al diseñar el recurso, pero no las menciones explícitamente en el
@@ -158,7 +189,10 @@ INSTRUCCIÓN DE SELECCIÓN DE HERRAMIENTA:
 
 
 def generate_resource_openrouter(
-    week: SilaboWeek, concordance: WeekConcordance, request: GenerationRequest
+    week: SilaboWeek,
+    concordance: WeekConcordance | None,
+    request: GenerationRequest,
+    forced_tool: str | None = None,
 ) -> GeneratedResource:
     api_key = OPENROUTER_API_KEY.strip()
     if not api_key:
@@ -166,7 +200,7 @@ def generate_resource_openrouter(
             "OPENROUTER_API_KEY no está configurada. La generación requiere una clave de OpenRouter."
         )
 
-    prompt = _build_prompt(week, concordance, request)
+    prompt = _build_prompt(week, concordance, request, forced_tool=forced_tool)
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -174,17 +208,6 @@ def generate_resource_openrouter(
     }
 
     tools_payload = [
-        {
-            "type": "function",
-            "function": {
-                "name": spec["name"],
-                "description": spec["description"],
-                "parameters": _get_clean_tool_schema(impl[0]),
-            },
-        }
-        for spec in _TOOL_SPECS
-        for name, impl in [_TOOL_IMPLS_item] if name == spec["name"]
-    ] if False else [
         {
             "type": "function",
             "function": {
@@ -276,7 +299,10 @@ def generate_resource_openrouter(
 
 
 def generate_resource_gemini(
-    week: SilaboWeek, concordance: WeekConcordance, request: GenerationRequest
+    week: SilaboWeek,
+    concordance: WeekConcordance | None,
+    request: GenerationRequest,
+    forced_tool: str | None = None,
 ) -> GeneratedResource:
     if not GEMINI_API_KEY:
         raise RuntimeError(
@@ -288,7 +314,7 @@ def generate_resource_gemini(
     from google.genai import types
 
     client = genai.Client(api_key=GEMINI_API_KEY)
-    prompt = _build_prompt(week, concordance, request)
+    prompt = _build_prompt(week, concordance, request, forced_tool=forced_tool)
 
     def build_interactive_activity(title: str, items: list[dict], instructions: str = "") -> str:
         """Crea una actividad de autoevaluación (opción múltiple con retroalimentación) autónoma en HTML."""
@@ -310,6 +336,14 @@ def generate_resource_gemini(
         """Crea una ficha o guía de estudio sintética infográfica con secciones e ideas clave."""
         return ""
 
+    def build_crossword(title: str, items: list[dict], instructions: str = "") -> str:
+        """Crea un crucigrama interactivo autónomo en HTML/CSS."""
+        return ""
+
+    def build_logic_puzzle(title: str, mode: str, pairs: list[dict] = [], sequence: list[str] = [], instructions: str = "") -> str:
+        """Crea un rompecabezas de lógica y relación (emparejar columnas o secuencia ordenada)."""
+        return ""
+
     models_to_try = [GEMINI_MODEL, "gemini-2.5-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
     seen = set()
     models_to_try = [m for m in models_to_try if m and not (m in seen or seen.add(m))]
@@ -323,7 +357,15 @@ def generate_resource_gemini(
                     model=model_name,
                     contents=prompt,
                     config=types.GenerateContentConfig(
-                        tools=[build_interactive_activity, render_diagram, build_word_search, build_flashcards, build_study_guide],
+                        tools=[
+                            build_interactive_activity,
+                            render_diagram,
+                            build_word_search,
+                            build_flashcards,
+                            build_study_guide,
+                            build_crossword,
+                            build_logic_puzzle,
+                        ],
                         temperature=0.7,
                         tool_config=types.ToolConfig(
                             function_calling_config=types.FunctionCallingConfig(
@@ -403,7 +445,10 @@ def generate_resource_gemini(
 
 
 def generate_resource_anthropic(
-    week: SilaboWeek, concordance: WeekConcordance, request: GenerationRequest
+    week: SilaboWeek,
+    concordance: WeekConcordance | None,
+    request: GenerationRequest,
+    forced_tool: str | None = None,
 ) -> GeneratedResource:
     api_key = ANTHROPIC_API_KEY.strip()
     if not api_key:
@@ -415,7 +460,7 @@ def generate_resource_anthropic(
     from anthropic import Anthropic
 
     client = Anthropic(api_key=api_key)
-    prompt = _build_prompt(week, concordance, request)
+    prompt = _build_prompt(week, concordance, request, forced_tool=forced_tool)
 
     models_to_try = [GENERATION_MODEL, "claude-sonnet-4-6", "claude-3-5-sonnet-20241022", "claude-3-haiku-20240307"]
     seen = set()
@@ -481,15 +526,18 @@ def generate_resource_anthropic(
 
 
 def generate_resource(
-    week: SilaboWeek, concordance: WeekConcordance, request: GenerationRequest
+    week: SilaboWeek,
+    concordance: WeekConcordance | None = None,
+    request: GenerationRequest = None,
+    forced_tool: str | None = None,
 ) -> GeneratedResource:
     provider = LLM_PROVIDER.lower().strip()
     if provider == "openrouter" or (not provider and OPENROUTER_API_KEY):
-        return generate_resource_openrouter(week, concordance, request)
+        return generate_resource_openrouter(week, concordance, request, forced_tool=forced_tool)
     elif provider == "gemini" or (not provider and GEMINI_API_KEY):
-        return generate_resource_gemini(week, concordance, request)
+        return generate_resource_gemini(week, concordance, request, forced_tool=forced_tool)
     elif provider == "anthropic" or ANTHROPIC_API_KEY:
-        return generate_resource_anthropic(week, concordance, request)
+        return generate_resource_anthropic(week, concordance, request, forced_tool=forced_tool)
     else:
         raise RuntimeError(
             "No se ha configurado ninguna API Key válida (OPENROUTER_API_KEY, GEMINI_API_KEY o ANTHROPIC_API_KEY)."

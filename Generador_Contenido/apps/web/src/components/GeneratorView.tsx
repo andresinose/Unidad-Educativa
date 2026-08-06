@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { downloadMaterial, downloadMaterialZip, getConversionJob, listMaterials, materialPreviewUrl, uploadMaterialPdf } from '../lib/api'
 import type { ConversionJob, Material } from '../lib/types'
 import CanvasTaskGenerator from './CanvasTaskGenerator'
@@ -135,7 +135,7 @@ export default function GeneratorView() {
             type="button"
             onClick={() => setMode('tarea')}
             className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-              mode === 'tarea' ? 'bg-blue-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              (mode as string) === 'tarea' ? 'bg-blue-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             📝 Crear Tarea Canvas

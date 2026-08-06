@@ -7,7 +7,7 @@ interface Props {
 }
 
 export function generateCanvasTaskHtml(
-  nombreTarea: string,
+  _nombreTarea: string,
   indicaciones: string,
   entregables: string,
   calificacion: string

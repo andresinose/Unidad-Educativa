@@ -152,8 +152,19 @@ export const INTENTS = [
 
 export type PedagogicalIntent = (typeof INTENTS)[number]
 
+export type ResourceBlockType =
+  | 'diagram'
+  | 'interactive_activity'
+  | 'word_search'
+  | 'flashcards'
+  | 'study_guide'
+  | 'crossword'
+  | 'logic_puzzle'
+  | 'geogebra'
+  | 'text'
+
 export interface ResourceBlock {
-  type: 'diagram' | 'interactive_activity' | 'geogebra' | 'text'
+  type: ResourceBlockType
   title: string
   payload: Record<string, unknown>
   rendered_html: string
@@ -167,6 +178,18 @@ export interface GeneratedResource {
   summary: string
   blocks: ResourceBlock[]
   mcp_tool_trace: string[]
+}
+
+export interface ActivitiesUploadResponse {
+  session_id: string
+  silabo: SilaboExtraction
+}
+
+export interface ActivitiesGenerateRequest {
+  session_id: string
+  week_number: number
+  resource_type: 'crossword' | 'logic_puzzle' | 'word_search' | 'flashcards'
+  extra_instructions?: string
 }
 
 export interface Material {

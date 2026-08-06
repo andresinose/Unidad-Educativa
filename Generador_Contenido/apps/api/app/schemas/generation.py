@@ -40,6 +40,8 @@ class ResourceBlockType(str, Enum):
     word_search = "word_search"
     flashcards = "flashcards"
     study_guide = "study_guide"
+    crossword = "crossword"
+    logic_puzzle = "logic_puzzle"
     geogebra = "geogebra"
     text = "text"
 

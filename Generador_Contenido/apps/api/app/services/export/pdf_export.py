@@ -453,6 +453,72 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
                 story.append(Spacer(1, 4))
             story.append(Spacer(1, 6))
 
+        elif block.type == ResourceBlockType.crossword:
+            instructions = payload.get("instructions") or "Lee las pistas y completa el crucigrama."
+            story.append(Paragraph(instructions, body_style))
+            story.append(Spacer(1, 6))
+
+            items = payload.get("items") or []
+            if items:
+                items_rows = [[Paragraph("Palabra", bold_cell), Paragraph("Pista / Definición", bold_cell)]]
+                for item in items:
+                    w = item.get("word") or ""
+                    c = item.get("clue") or ""
+                    items_rows.append([
+                        Paragraph(f"<b>{w}</b>", body_style),
+                        Paragraph(c, body_style)
+                    ])
+                cw_table = Table(items_rows, colWidths=[160, 360])
+                cw_table.setStyle(
+                    TableStyle([
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0a2f68")),
+                        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e1")),
+                        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                        ("TOPPADDING", (0, 0), (-1, -1), 6),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+                    ])
+                )
+                story.append(cw_table)
+                story.append(Spacer(1, 10))
+
+        elif block.type == ResourceBlockType.logic_puzzle:
+            instructions = payload.get("instructions") or "Resuelve la actividad de lógica."
+            story.append(Paragraph(instructions, body_style))
+            story.append(Spacer(1, 6))
+
+            mode = payload.get("mode") or "relacionar"
+            if mode == "ordenar":
+                seq = payload.get("sequence") or []
+                story.append(Paragraph("<b>Secuencia de pasos:</b>", body_style))
+                for idx, step in enumerate(seq, 1):
+                    story.append(Paragraph(f"{idx}. {step}", body_style))
+                story.append(Spacer(1, 8))
+            else:
+                pairs = payload.get("pairs") or []
+                if pairs:
+                    pair_rows = [[Paragraph("Columna A", bold_cell), Paragraph("Columna B (Pareja)", bold_cell)]]
+                    for p in pairs:
+                        l = p.get("left") or ""
+                        r = p.get("right") or ""
+                        pair_rows.append([
+                            Paragraph(f"<b>{l}</b>", body_style),
+                            Paragraph(r, body_style)
+                        ])
+                    lp_table = Table(pair_rows, colWidths=[250, 250])
+                    lp_table.setStyle(
+                        TableStyle([
+                            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0a2f68")),
+                            ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e1")),
+                            ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                            ("TOPPADDING", (0, 0), (-1, -1), 6),
+                            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+                        ])
+                    )
+                    story.append(lp_table)
+                    story.append(Spacer(1, 10))
+
         elif block.type == ResourceBlockType.study_guide:
             sections = payload.get("sections") or []
             for sec in sections:

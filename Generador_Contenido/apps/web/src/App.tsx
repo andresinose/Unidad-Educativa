@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MenuInicial from './components/MenuInicial'
 import GeneratorView from './components/GeneratorView'
+import { ActividadesView } from './components/ActividadesView'
 import UploadStep from './components/UploadStep'
 import ConcordanceStep from './components/ConcordanceStep'
 import GenerateStep from './components/GenerateStep'
@@ -8,12 +9,13 @@ import DownloadStep from './components/DownloadStep'
 import { analyzeDocuments, generateResource, ApiError } from './lib/api'
 import type { AnalyzeResponse, GeneratedResource, PedagogicalIntent } from './lib/types'
 
-type Modulo = 'menu' | 'validador' | 'generador'
+type Modulo = 'menu' | 'validador' | 'generador' | 'actividades'
 type Step = 1 | 2 | 3 | 4
 
 const MODULO_LABELS: Record<Exclude<Modulo, 'menu'>, string> = {
   validador: 'Validador de Contenidos Curriculares',
   generador: 'Generador de Contenidos Didácticos',
+  actividades: 'Generador de Actividades Lúdicas',
 }
 
 const STEP_LABELS: Record<Step, string> = {
@@ -132,6 +134,11 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {/* Module 3: Actividades Lúdicas */}
+      {modulo === 'actividades' && (
+        <ActividadesView onBackToMenu={() => setModulo('menu')} />
+      )}
 
       {/* Module 2: Generador de Contenidos */}
       {modulo === 'generador' && (

@@ -149,3 +149,46 @@ export async function exportConcordancePdf(data: AnalyzeResponse) {
   URL.revokeObjectURL(url)
 }
 
+export async function uploadActivitiesSilabo(silabo: File): Promise<import('./types').ActivitiesUploadResponse> {
+  const form = new FormData()
+  form.append('silabo', silabo)
+  const res = await fetch(`${BASE}/activities/upload`, { method: 'POST', body: form })
+  return unwrap(res)
+}
+
+export async function generateActivity(
+  sessionId: string,
+  weekNumber: number,
+  resourceType: 'crossword' | 'logic_puzzle' | 'word_search' | 'flashcards',
+  extraInstructions?: string,
+): Promise<GeneratedResource> {
+  const res = await fetch(`${BASE}/activities/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      session_id: sessionId,
+      week_number: weekNumber,
+      resource_type: resourceType,
+      extra_instructions: extraInstructions || '',
+    }),
+  })
+  return unwrap(res)
+}
+
+export async function downloadActivityPdf(sessionId: string) {
+  const res = await fetch(`${BASE}/activities/${sessionId}/download/pdf`)
+  if (!res.ok) throw new ApiError(res.statusText, res.status)
+  const blob = await res.blob()
+  const disposition = res.headers.get('Content-Disposition') || ''
+  const match = /filename="([^"]+)"/.exec(disposition)
+  const filename = match ? match[1] : 'actividad_ludica.pdf'
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
