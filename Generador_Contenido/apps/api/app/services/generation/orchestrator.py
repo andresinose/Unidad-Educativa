@@ -11,6 +11,9 @@ import httpx
 
 from app.core.config import (
     ANTHROPIC_API_KEY,
+    DEEPSEEK_API_KEY,
+    DEEPSEEK_BASE_URL,
+    DEEPSEEK_MODEL,
     GEMINI_API_KEY,
     GEMINI_MODEL,
     GENERATION_MODEL,
@@ -525,6 +528,103 @@ def generate_resource_anthropic(
     )
 
 
+def generate_resource_deepseek(
+    week: SilaboWeek,
+    concordance: WeekConcordance | None,
+    request: GenerationRequest,
+    forced_tool: str | None = None,
+) -> GeneratedResource:
+    api_key = DEEPSEEK_API_KEY.strip() or os.environ.get("DEEPSEEK_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError(
+            "DEEPSEEK_API_KEY no está configurada. La generación de recursos requiere una clave de DeepSeek API."
+        )
+
+    prompt = _build_prompt(week, concordance, request, forced_tool=forced_tool)
+    base_url = DEEPSEEK_BASE_URL.rstrip("/")
+    url = f"{base_url}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    tools_payload = [
+        {
+            "type": "function",
+            "function": {
+                "name": name,
+                "description": impl[0].__doc__ or name,
+                "parameters": _get_clean_tool_schema(impl[0]),
+            },
+        }
+        for name, impl in _TOOL_IMPLS.items()
+    ]
+
+    payload = {
+        "model": DEEPSEEK_MODEL or "deepseek-chat",
+        "max_tokens": 3000,
+        "messages": [{"role": "user", "content": prompt}],
+        "tools": tools_payload,
+        "tool_choice": "required",
+    }
+
+    try:
+        r = httpx.post(url, headers=headers, json=payload, timeout=35)
+        if r.status_code != 200:
+            raise RuntimeError(f"DeepSeek API error {r.status_code}: {r.text}")
+        response_data = r.json()
+    except Exception as exc:
+        raise RuntimeError(f"Fallo en la llamada a DeepSeek API: {exc}")
+
+    blocks: list[ResourceBlock] = []
+    trace: list[str] = []
+
+    choices = response_data.get("choices") or []
+    if choices:
+        msg = choices[0].get("message") or {}
+        tool_calls = msg.get("tool_calls") or []
+
+        for call in tool_calls:
+            func = call.get("function") or {}
+            tool_name = func.get("name") or ""
+            raw_args_str = func.get("arguments") or "{}"
+
+            impl = _TOOL_IMPLS.get(tool_name)
+            if impl is None:
+                trace.append(f"{tool_name}: herramienta desconocida, ignorada")
+                continue
+
+            schema_cls, fn, block_type = impl
+            try:
+                raw_args = json.loads(raw_args_str) if isinstance(raw_args_str, str) else raw_args_str
+                validated = schema_cls.model_validate(raw_args)
+            except Exception as exc:
+                trace.append(f"{tool_name}: entrada inválida ({exc})")
+                continue
+
+            rendered_html = fn(validated)
+            title = getattr(validated, "title", tool_name)
+            blocks.append(
+                ResourceBlock(type=block_type, title=title, payload=raw_args, rendered_html=rendered_html)
+            )
+            trace.append(f"{tool_name}: ok")
+
+    if not blocks:
+        raise RuntimeError(
+            "El modelo DeepSeek no produjo ningún bloque válido a través de las herramientas disponibles."
+        )
+
+    return GeneratedResource(
+        title=blocks[0].title or f"Recurso — Semana {week.week_number}",
+        week_number=week.week_number,
+        topic=week.topic,
+        intent=request.intent,
+        summary="Generado exitosamente con DeepSeek V4 Flash",
+        blocks=blocks,
+        mcp_tool_trace=trace,
+    )
+
+
 def generate_resource(
     week: SilaboWeek,
     concordance: WeekConcordance | None = None,
@@ -532,7 +632,9 @@ def generate_resource(
     forced_tool: str | None = None,
 ) -> GeneratedResource:
     provider = LLM_PROVIDER.lower().strip()
-    if provider == "openrouter" or (not provider and OPENROUTER_API_KEY):
+    if provider == "deepseek" or DEEPSEEK_API_KEY:
+        return generate_resource_deepseek(week, concordance, request, forced_tool=forced_tool)
+    elif provider == "openrouter" or (not provider and OPENROUTER_API_KEY):
         return generate_resource_openrouter(week, concordance, request, forced_tool=forced_tool)
     elif provider == "gemini" or (not provider and GEMINI_API_KEY):
         return generate_resource_gemini(week, concordance, request, forced_tool=forced_tool)
@@ -540,5 +642,6 @@ def generate_resource(
         return generate_resource_anthropic(week, concordance, request, forced_tool=forced_tool)
     else:
         raise RuntimeError(
-            "No se ha configurado ninguna API Key válida (OPENROUTER_API_KEY, GEMINI_API_KEY o ANTHROPIC_API_KEY)."
+            "No se ha configurado ninguna API Key válida (DEEPSEEK_API_KEY, OPENROUTER_API_KEY, GEMINI_API_KEY o ANTHROPIC_API_KEY)."
         )
+

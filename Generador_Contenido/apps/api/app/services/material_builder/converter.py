@@ -10,7 +10,7 @@ from typing import Callable, Optional
 import fitz  # PyMuPDF
 from PIL import Image
 
-from app.core.config import ANTHROPIC_API_KEY, GENERATION_MODEL
+from app.core.config import ANTHROPIC_API_KEY, GEMINI_API_KEY, GEMINI_MODEL, GENERATION_MODEL, OPENROUTER_API_KEY
 from app.services.material_builder.blocks import MetadatosMaterial, PaginaTranscrita
 from app.services.material_builder.renderer import render_pagina
 from app.services.material_builder.shell import build_material_shell
@@ -100,11 +100,62 @@ def _clean_raw_input_dict(raw_input: dict) -> dict:
     return raw_input
 
 
+def _transcribe_page_gemini(png_bytes: bytes, page_num: int) -> PaginaTranscrita | None:
+    """Calls Gemini Vision API to transcribe page PNG bytes into structured PaginaTranscrita."""
+    if not GEMINI_API_KEY.strip():
+        return None
+    try:
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=GEMINI_API_KEY.strip())
+        prompt = (
+            f"Transcribe con alta precisión pedagógica la página {page_num} del PDF adjunto a bloques didácticos en formato JSON estricto.\n"
+            "Esquema JSON esperado: {\"numero_pagina\": N, \"encabezado\": \"...\", \"bloques\": [{\"tipo\": \"parrafo|titulo_seccion|subtitulo|caja|lista|tabla_datos|ejercicio_relleno|zona_trabajo\", ...}]}\n"
+            "Convierte cualquier ejercicio o pregunta en un bloque 'ejercicio_relleno' con opciones u opción de respuesta correcta.\n"
+            "Si hay zonas de trabajo o espacio libre para resolver, incluye un bloque 'zona_trabajo'."
+        )
+
+        response = client.models.generate_content(
+            model=GEMINI_MODEL or "gemini-2.5-flash",
+            contents=[
+                types.Part.from_bytes(data=png_bytes, mime_type="image/png"),
+                prompt,
+            ],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.1,
+            ),
+        )
+
+        if response and response.text:
+            clean_text = response.text.strip()
+            if "```json" in clean_text:
+                clean_text = clean_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in clean_text:
+                clean_text = clean_text.split("```")[1].split("```")[0].strip()
+
+            raw_dict = json.loads(clean_text)
+            raw_dict["numero_pagina"] = page_num
+            raw_dict = _clean_raw_input_dict(raw_dict)
+            return PaginaTranscrita.model_validate(raw_dict)
+    except Exception:
+        pass
+    return None
+
+
 def _default_claude_transcribe_page(page_png_bytes: bytes, page_num: int, model_name: str = "claude-sonnet-4-6") -> PaginaTranscrita:
-    """Calls Claude Vision to transcribe one PDF page into structured Pydantic blocks."""
+    """Calls Gemini or Claude Vision to transcribe one PDF page into structured Pydantic blocks."""
+    # 1. Try Gemini Vision first if GEMINI_API_KEY is configured
+    gemini_res = _transcribe_page_gemini(page_png_bytes, page_num)
+    if gemini_res:
+        return gemini_res
+
     api_key = ANTHROPIC_API_KEY.strip()
     if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY no está configurada para el Generador de Contenidos.")
+        raise RuntimeError(
+            "No se ha configurado ninguna API Key de Visión (GEMINI_API_KEY o ANTHROPIC_API_KEY) para la digitalización de PDFs."
+        )
 
     from anthropic import Anthropic
     client = Anthropic(api_key=api_key)
@@ -173,7 +224,30 @@ def _default_claude_transcribe_page(page_png_bytes: bytes, page_num: int, model_
 
 
 def _default_claude_detect_metadata(cover_png_bytes: bytes, filename: str) -> MetadatosMaterial:
-    """Calls Claude Vision to extract material metadata (title, subject, grade, teacher) from cover."""
+    """Calls Gemini or Claude Vision to extract material metadata (title, subject, grade, teacher) from cover."""
+    if GEMINI_API_KEY.strip():
+        try:
+            from google import genai
+            from google.genai import types
+            client = genai.Client(api_key=GEMINI_API_KEY.strip())
+            res = client.models.generate_content(
+                model=GEMINI_MODEL or "gemini-2.5-flash",
+                contents=[
+                    types.Part.from_bytes(data=cover_png_bytes, mime_type="image/png"),
+                    "Extrae título, materia, grado, unidad y docente de esta portada educativa en JSON estricto con campos: titulo, materia, grado, unidad, docente.",
+                ],
+                config=types.GenerateContentConfig(response_mime_type="application/json"),
+            )
+            if res and res.text:
+                clean_text = res.text.strip()
+                if "```json" in clean_text:
+                    clean_text = clean_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in clean_text:
+                    clean_text = clean_text.split("```")[1].split("```")[0].strip()
+                return MetadatosMaterial.model_validate(json.loads(clean_text))
+        except Exception:
+            pass
+
     api_key = ANTHROPIC_API_KEY.strip()
     if not api_key:
         return MetadatosMaterial(titulo=os.path.splitext(filename)[0])

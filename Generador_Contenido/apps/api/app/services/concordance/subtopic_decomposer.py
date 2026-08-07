@@ -85,23 +85,68 @@ def descomponer_subtemas_batch(weeks: list[SilaboWeek], api_key: str | None = No
     if not weeks_to_parse:
         return res
 
-    key = api_key or os.environ.get("ANTHROPIC_API_KEY")
-    if key:
+    deepseek_key = api_key or os.environ.get("DEEPSEEK_API_KEY", "").strip()
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+
+    prompt_input = [{"numero": w.week_number, "tema": w.topic} for w in weeks_to_parse]
+    system_prompt = (
+        "Eres un experto en planificación curricular. Recibes los temas semanales de un sílabo. "
+        "Descompón cada tema en subtemas atómicos (unidades de contenido enseñables por separado).\n"
+        "Reglas:\n"
+        "- Conserva el contexto: 'propiedades, reglas de signo' dentro de un tema de multiplicación pertenecen a ese tema.\n"
+        "- No inventes subtemas que no estén en el texto.\n"
+        "- Ignora conectores y frases de encuadre.\n"
+        "Responde SOLO JSON estricto con el formato: {\"semanas\": [{\"numero\": N, \"subtemas\": [\"...\", ...]}]}"
+    )
+
+    content_text = None
+    if deepseek_key:
+        try:
+            import httpx
+            base_url = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/")
+            url = f"{base_url}/chat/completions"
+            headers = {"Authorization": f"Bearer {deepseek_key}", "Content-Type": "application/json"}
+            payload = {
+                "model": os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": json.dumps(prompt_input, ensure_ascii=False)},
+                ],
+                "temperature": 0.0,
+                "response_format": {"type": "json_object"},
+            }
+            resp = httpx.post(url, headers=headers, json=payload, timeout=30)
+            if resp.status_code == 200:
+                data = resp.json()
+                content_text = data["choices"][0]["message"]["content"]
+        except Exception:
+            pass
+
+    if not content_text and openrouter_key:
+        try:
+            import httpx
+            url = "https://openrouter.ai/api/v1/chat/completions"
+            headers = {"Authorization": f"Bearer {openrouter_key}", "Content-Type": "application/json"}
+            payload = {
+                "model": "deepseek/deepseek-chat",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": json.dumps(prompt_input, ensure_ascii=False)},
+                ],
+                "temperature": 0.0,
+            }
+            resp = httpx.post(url, headers=headers, json=payload, timeout=30)
+            if resp.status_code == 200:
+                data = resp.json()
+                content_text = data["choices"][0]["message"]["content"]
+        except Exception:
+            pass
+
+    if not content_text and anthropic_key:
         try:
             import anthropic
-            client = anthropic.Anthropic(api_key=key)
-            prompt_input = [{"numero": w.week_number, "tema": w.topic} for w in weeks_to_parse]
-            
-            system_prompt = (
-                "Eres un experto en planificación curricular. Recibes los temas semanales de un sílabo. "
-                "Descompón cada tema en subtemas atómicos (unidades de contenido enseñables por separado).\n"
-                "Reglas:\n"
-                "- Conserva el contexto: 'propiedades, reglas de signo' dentro de un tema de multiplicación pertenecen a ese tema.\n"
-                "- No inventes subtemas que no estén en el texto.\n"
-                "- Ignora conectores y frases de encuadre.\n"
-                "Responde SOLO JSON estricto con el formato: {\"semanas\": [{\"numero\": N, \"subtemas\": [\"...\", ...]}]}"
-            )
-            
+            client = anthropic.Anthropic(api_key=anthropic_key)
             response = client.messages.create(
                 model="claude-3-5-haiku-20241022",
                 max_tokens=1500,
@@ -109,19 +154,24 @@ def descomponer_subtemas_batch(weeks: list[SilaboWeek], api_key: str | None = No
                 system=system_prompt,
                 messages=[{"role": "user", "content": json.dumps(prompt_input, ensure_ascii=False)}]
             )
-            
             content_text = response.content[0].text.strip()
-            if "```json" in content_text:
-                content_text = content_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in content_text:
-                content_text = content_text.split("```")[1].split("```")[0].strip()
+        except Exception:
+            pass
 
-            parsed = json.loads(content_text)
+    if content_text:
+        try:
+            clean_text = content_text.strip()
+            if "```json" in clean_text:
+                clean_text = clean_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in clean_text:
+                clean_text = clean_text.split("```")[1].split("```")[0].strip()
+
+            parsed = json.loads(clean_text)
             for item in parsed.get("semanas", []):
                 wn = item.get("numero")
                 subs = item.get("subtemas", [])
                 if wn is not None and isinstance(subs, list):
-                    res[wn] = [s.strip().lower() for s in subs if s.strip()]
+                    res[wn] = [s.strip().lower() for s in subs if isinstance(s, str) and s.strip()]
         except Exception:
             pass
 

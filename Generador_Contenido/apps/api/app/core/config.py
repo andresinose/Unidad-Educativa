@@ -4,6 +4,12 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
+
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 # Root for ephemeral per-session working directories (uploads + generated exports).
@@ -21,6 +27,10 @@ MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB, matches the UX copy already valida
 # How long a session's working directory is kept before cleanup, in seconds.
 SESSION_TTL_SECONDS = int(os.environ.get("SESSION_TTL_SECONDS", 60 * 60 * 6))  # 6h
 
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
+DEEPSEEK_BASE_URL = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 
@@ -32,7 +42,8 @@ GENERATION_MODEL = os.environ.get("GENERATION_MODEL", "claude-sonnet-4-6")
 
 LLM_PROVIDER = os.environ.get(
     "LLM_PROVIDER",
-    "openrouter" if OPENROUTER_API_KEY else ("gemini" if GEMINI_API_KEY else ("anthropic" if ANTHROPIC_API_KEY else "openrouter")),
+    "deepseek" if DEEPSEEK_API_KEY else ("openrouter" if OPENROUTER_API_KEY else ("gemini" if GEMINI_API_KEY else ("anthropic" if ANTHROPIC_API_KEY else "deepseek"))),
 )
 
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")
+
