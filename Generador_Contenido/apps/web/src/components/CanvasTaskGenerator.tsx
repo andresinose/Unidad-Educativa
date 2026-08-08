@@ -357,6 +357,19 @@ export default function CanvasTaskGenerator({ initialTitle = '', initialIndicaci
             </div>
           </div>
 
+          {/* Guide for Canvas LMS Integration */}
+          <details className="bg-blue-50/70 border border-blue-200 rounded-2xl p-4 text-xs text-blue-950 space-y-2">
+            <summary className="font-bold text-blue-900 cursor-pointer flex items-center gap-2 select-none">
+              <span>💡 ¿Cómo publicar esta tarea en Canvas LMS? (Paso a paso)</span>
+            </summary>
+            <ol className="list-decimal list-inside space-y-1.5 pl-2 pt-2 text-slate-700 font-medium">
+              <li>Haz clic en el botón <strong>"📋 Copiar Código HTML"</strong>.</li>
+              <li>Ingresa a tu curso en <strong>Canvas LMS</strong> ➔ Tareas ➔ <em>+ Tarea</em>.</li>
+              <li>En la parte inferior derecha del editor de texto de Canvas, haz clic en el icono <strong>&lt;/&gt; (Editor de código HTML)</strong>.</li>
+              <li>Pega el código copiado y presiona <strong>Guardar y publicar</strong>.</li>
+            </ol>
+          </details>
+
           {activeTab === 'preview' ? (
             <div className="border border-slate-300 rounded-2xl p-6 bg-white min-h-[300px]">
               <div dangerouslySetInnerHTML={{ __html: generatedHtml }} />

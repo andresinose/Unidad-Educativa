@@ -94,6 +94,14 @@ def parse_guia_pdf(path: str | Path) -> GuiaExtraction:
         pages_text = [p.extract_text() or "" for p in pdf.pages]
 
     total_pages = len(pages_text)
+    total_char_count = sum(len(p.strip()) for p in pages_text)
+
+    if total_pages > 0 and total_char_count < 150:
+        warnings.append(
+            "El documento PDF parece ser un archivo escaneado o de imagen sin texto seleccionable. "
+            "Se recomienda utilizar un archivo digital original en PDF o Word para un análisis preciso."
+        )
+
     subject, grade, fechas_globales = _extract_cover_and_fechas(pages_text) if pages_text else ("", "", "")
 
     semanas_mencionadas = _find_semanas_mencionadas(pages_text)

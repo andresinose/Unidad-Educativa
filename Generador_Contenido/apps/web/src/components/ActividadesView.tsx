@@ -3,10 +3,10 @@ import type { ActivitiesUploadResponse, GeneratedResource, SilaboWeek } from '..
 import { downloadActivityPdf, generateActivity, uploadActivitiesSilabo } from '../lib/api'
 
 interface ActividadesViewProps {
-  onBackToMenu: () => void
+  onBackToMenu?: () => void
 }
 
-export const ActividadesView: React.FC<ActividadesViewProps> = ({ onBackToMenu }) => {
+export const ActividadesView: React.FC<ActividadesViewProps> = () => {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadData, setUploadData] = useState<ActivitiesUploadResponse | null>(null)
@@ -89,24 +89,16 @@ export const ActividadesView: React.FC<ActividadesViewProps> = ({ onBackToMenu }
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🎮</span>
-              <h1 className="text-2xl font-bold text-slate-900">
-                Generador de Actividades Lúdicas
-              </h1>
-            </div>
-            <p className="text-slate-600 text-sm mt-1">
-              Crea crucigramas, rompecabezas de lógica, sopas de letras y flashcards autónomos a partir de tu planificación curricular.
-            </p>
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🎮</span>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Generador de Actividades Lúdicas
+            </h1>
           </div>
-          <button
-            onClick={onBackToMenu}
-            className="px-4 py-2 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-300 self-start sm:self-auto"
-          >
-            ← Menú Principal
-          </button>
+          <p className="text-slate-600 text-sm mt-1">
+            Crea crucigramas, rompecabezas de lógica, sopas de letras y flashcards autónomos a partir de tu planificación curricular.
+          </p>
         </div>
 
         {/* Error Notification */}

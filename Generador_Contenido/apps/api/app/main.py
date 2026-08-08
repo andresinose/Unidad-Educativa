@@ -10,10 +10,26 @@ from app.core.session import sweep_expired_sessions
 from app.routers import activities, documents, export, generation, materials
 
 
+import asyncio
+
+async def _periodic_session_sweep():
+    while True:
+        try:
+            sweep_expired_sessions()
+        except Exception:
+            pass
+        await asyncio.sleep(3600)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     sweep_expired_sessions()
-    yield
+    task = asyncio.create_task(_periodic_session_sweep())
+    try:
+        yield
+    finally:
+        task.cancel()
+
 
 
 app = FastAPI(

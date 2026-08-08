@@ -56,6 +56,7 @@ export default function ConcordanceStep({ data, onContinue, onBack }: Props) {
   const { silabo, guia, concordance } = data
   const [expandedWeeks, setExpandedWeeks] = useState<Record<number, boolean>>({})
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
+  const [overrideModalWeek, setOverrideModalWeek] = useState<{ week_number: number; topic: string } | null>(null)
 
   const toggleWeek = (wn: number) => {
     setExpandedWeeks((prev) => ({ ...prev, [wn]: !prev[wn] }))
@@ -80,6 +81,44 @@ export default function ConcordanceStep({ data, onContinue, onBack }: Props) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Modal de Advertencia Pedagógica para Semanas con Brechas */}
+      {overrideModalWeek && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center gap-3 text-amber-600">
+              <span className="text-3xl">⚠️</span>
+              <h3 className="text-lg font-bold text-slate-900">Advertencia de Trazabilidad Curricular</h3>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              La <strong>Semana {overrideModalWeek.week_number}</strong> (<em>{overrideModalWeek.topic}</em>) presenta vacíos de desarrollo o no cumple totalmente la concordancia en la guía didáctica.
+            </p>
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-medium">
+              ℹ️ Se permitirá la generación de recursos didácticos a solicitud del docente. Tenga en cuenta que el contenido generado requerirá supervisión y ajuste pedagógico adicional.
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setOverrideModalWeek(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl bg-slate-100 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const wn = overrideModalWeek.week_number
+                  setOverrideModalWeek(null)
+                  onContinue(wn)
+                }}
+                className="px-5 py-2.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-xs transition-colors"
+              >
+                Continuar de todas formas →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Encabezado y Sello Global */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -301,23 +340,18 @@ export default function ConcordanceStep({ data, onContinue, onBack }: Props) {
                   <button
                     type="button"
                     onClick={() => onContinue(wn)}
-                    className="w-full text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 rounded-md shadow-sm transition-colors"
+                    className="w-full text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 rounded-md shadow-sm transition-colors cursor-pointer"
                   >
                     Generar Recursos →
                   </button>
                 ) : (
-                  <div className="relative group">
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full text-xs font-semibold bg-gray-200 text-gray-400 py-1.5 rounded-md cursor-not-allowed"
-                    >
-                      Bloqueado
-                    </button>
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:block w-48 p-2 bg-gray-900 text-white text-[10px] rounded shadow-lg z-10 text-center">
-                      Corrige el material de esta semana para habilitar la generación
-                    </div>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setOverrideModalWeek({ week_number: wn, topic: w.tema_silabo || w.topic || '' })}
+                    className="w-full text-xs font-bold bg-amber-100 border border-amber-300 hover:bg-amber-200 text-amber-900 py-1.5 rounded-md transition-colors cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <span>⚠️ Generar con Advertencia</span>
+                  </button>
                 )}
               </div>
             )

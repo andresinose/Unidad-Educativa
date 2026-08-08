@@ -112,6 +112,8 @@ async def generate_activity(req: ActivitiesGenerateRequest) -> GeneratedResource
             request=gen_req,
             forced_tool=forced_tool,
         )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Error en la generación del recurso: {exc}") from exc
 
