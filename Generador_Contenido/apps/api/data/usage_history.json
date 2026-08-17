@@ -1,0 +1,819 @@
+[
+  {
+    "id": "c29135bf-ac46-4404-a6df-c8ae203499be",
+    "timestamp": "2026-08-11T10:19:55.289111",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2718,
+    "completion_tokens": 527,
+    "total_tokens": 3245,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0005281,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "presentar"
+    }
+  },
+  {
+    "id": "da3383bd-7b52-48df-a860-1742fad028da",
+    "timestamp": "2026-08-11T10:20:46.912053",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2722,
+    "completion_tokens": 240,
+    "total_tokens": 2962,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0004483,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "comprender"
+    }
+  },
+  {
+    "id": "d133e0f8-4f1d-4d01-a3e0-cd40df6a675f",
+    "timestamp": "2026-08-11T10:21:22.711867",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2727,
+    "completion_tokens": 1368,
+    "total_tokens": 4095,
+    "cache_hit_tokens": 2560,
+    "cost_usd": 0.0004423,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "reforzar"
+    }
+  },
+  {
+    "id": "d309a280-523d-4b1f-9adf-4dc054966475",
+    "timestamp": "2026-08-11T10:21:56.604708",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2729,
+    "completion_tokens": 628,
+    "total_tokens": 3357,
+    "cache_hit_tokens": 2560,
+    "cost_usd": 0.0002353,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "experimentar"
+    }
+  },
+  {
+    "id": "47df48e3-3e4e-4fe6-8d35-2ccd3e890c3f",
+    "timestamp": "2026-08-11T10:22:14.868281",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2886,
+    "completion_tokens": 440,
+    "total_tokens": 3326,
+    "cache_hit_tokens": 2560,
+    "cost_usd": 0.0002047,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "visualizar"
+    }
+  },
+  {
+    "id": "4608a7b2-9291-4d78-89e6-39d86d68ddb1",
+    "timestamp": "2026-08-11T10:22:34.137339",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2889,
+    "completion_tokens": 395,
+    "total_tokens": 3284,
+    "cache_hit_tokens": 2560,
+    "cost_usd": 0.0001925,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "comparar"
+    }
+  },
+  {
+    "id": "897f38d6-c88e-4037-b7af-8c88fcf476c0",
+    "timestamp": "2026-08-11T10:22:57.157091",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2756,
+    "completion_tokens": 1604,
+    "total_tokens": 4360,
+    "cache_hit_tokens": 2560,
+    "cost_usd": 0.0005124,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "evaluar"
+    }
+  },
+  {
+    "id": "0ef1b71a-b5fb-4a41-b45f-186b08665549",
+    "timestamp": "2026-08-11T10:23:22.427695",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2747,
+    "completion_tokens": 1359,
+    "total_tokens": 4106,
+    "cache_hit_tokens": 2560,
+    "cost_usd": 0.0004425,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "practicar"
+    }
+  },
+  {
+    "id": "49ebc0bc-5f76-4a0c-9578-13140bfaf15b",
+    "timestamp": "2026-08-11T10:32:49.440765",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2886,
+    "completion_tokens": 328,
+    "total_tokens": 3214,
+    "cache_hit_tokens": 2560,
+    "cost_usd": 0.0001733,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "presentar"
+    }
+  },
+  {
+    "id": "67522772-681e-4ba8-b7d1-09107c4dc4d4",
+    "timestamp": "2026-08-11T10:33:35.398699",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2889,
+    "completion_tokens": 414,
+    "total_tokens": 3303,
+    "cache_hit_tokens": 2816,
+    "cost_usd": 0.0001656,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "comparar"
+    }
+  },
+  {
+    "id": "f21c0f31-b546-40cc-b279-7fc3179282bf",
+    "timestamp": "2026-08-11T10:34:13.085497",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2756,
+    "completion_tokens": 1232,
+    "total_tokens": 3988,
+    "cache_hit_tokens": 2560,
+    "cost_usd": 0.0004082,
+    "metadata": {
+      "week_number": 1,
+      "topic": "Concepto de números enteros, recta numérica, números opuestos, plano cartesiano, valor absoluto y relaciones de orden.",
+      "intent": "experimentar"
+    }
+  },
+  {
+    "id": "1537467b-28d8-43e2-994e-e49985a9a45d",
+    "timestamp": "2026-08-11T15:49:06.974159",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "descomposicion_subtemas",
+    "prompt_tokens": 181,
+    "completion_tokens": 22,
+    "total_tokens": 203,
+    "cache_hit_tokens": 0,
+    "cost_usd": 3.15e-05,
+    "metadata": {
+      "weeks_count": 1
+    }
+  },
+  {
+    "id": "42561245-7aa6-4f69-86c9-03a58bf549bd",
+    "timestamp": "2026-08-11T15:49:08.794717",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 207,
+    "completion_tokens": 69,
+    "total_tokens": 276,
+    "cache_hit_tokens": 0,
+    "cost_usd": 4.83e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "12e415b2-4e3c-4e0d-ba36-a8c1e959c21b",
+    "timestamp": "2026-08-11T15:49:32.829333",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 223,
+    "completion_tokens": 76,
+    "total_tokens": 299,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.64e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "afe9176b-65c3-4565-bd53-35e7ed788566",
+    "timestamp": "2026-08-11T15:49:35.040277",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 262,
+    "completion_tokens": 151,
+    "total_tokens": 413,
+    "cache_hit_tokens": 128,
+    "cost_usd": 6.28e-05,
+    "metadata": {
+      "dudosos_count": 2
+    }
+  },
+  {
+    "id": "06e75b1a-0482-4aff-8cab-c94574a62f89",
+    "timestamp": "2026-08-11T15:49:37.387621",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 293,
+    "completion_tokens": 194,
+    "total_tokens": 487,
+    "cache_hit_tokens": 128,
+    "cost_usd": 7.92e-05,
+    "metadata": {
+      "dudosos_count": 3
+    }
+  },
+  {
+    "id": "4af61bbc-d19b-42aa-a62b-198c384d7731",
+    "timestamp": "2026-08-11T16:08:25.348407",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 249,
+    "total_tokens": 1477,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0002416,
+    "metadata": {
+      "page_num": 1
+    }
+  },
+  {
+    "id": "94bb8d79-25cc-458a-84d7-37986f60d221",
+    "timestamp": "2026-08-11T16:09:47.882078",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1225,
+    "completion_tokens": 28,
+    "total_tokens": 1253,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0001793,
+    "metadata": {
+      "page_num": 1
+    }
+  },
+  {
+    "id": "8b565584-94ad-4eea-98d3-77454a12bd04",
+    "timestamp": "2026-08-11T16:10:12.316621",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "descomposicion_subtemas",
+    "prompt_tokens": 181,
+    "completion_tokens": 22,
+    "total_tokens": 203,
+    "cache_hit_tokens": 128,
+    "cost_usd": 1.54e-05,
+    "metadata": {
+      "weeks_count": 1
+    }
+  },
+  {
+    "id": "404b0009-d723-4956-9535-f3f46529e2ce",
+    "timestamp": "2026-08-11T16:10:14.510709",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 207,
+    "completion_tokens": 71,
+    "total_tokens": 278,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.27e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "d96e5d75-d739-48da-9dfd-bcdcbb2444b9",
+    "timestamp": "2026-08-11T16:10:29.260641",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 223,
+    "completion_tokens": 76,
+    "total_tokens": 299,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.64e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "f236711a-63b2-4f6e-b653-60219efeaa41",
+    "timestamp": "2026-08-11T16:10:31.941036",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 262,
+    "completion_tokens": 151,
+    "total_tokens": 413,
+    "cache_hit_tokens": 256,
+    "cost_usd": 4.67e-05,
+    "metadata": {
+      "dudosos_count": 2
+    }
+  },
+  {
+    "id": "0f97c966-de4d-4ebb-aa0b-28f63e5091c5",
+    "timestamp": "2026-08-11T16:10:34.768735",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 293,
+    "completion_tokens": 194,
+    "total_tokens": 487,
+    "cache_hit_tokens": 256,
+    "cost_usd": 6.31e-05,
+    "metadata": {
+      "dudosos_count": 3
+    }
+  },
+  {
+    "id": "84fa63e4-6d8a-4c3c-8444-17ccae01b3f9",
+    "timestamp": "2026-08-11T16:11:11.787403",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 255,
+    "total_tokens": 1483,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0002433,
+    "metadata": {
+      "page_num": 1
+    }
+  },
+  {
+    "id": "84790806-0bf9-44c0-9fe1-9519186bb218",
+    "timestamp": "2026-08-11T16:11:44.520541",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 258,
+    "total_tokens": 1486,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0002442,
+    "metadata": {
+      "page_num": 1
+    }
+  },
+  {
+    "id": "36974db8-38a0-41d2-b514-08627cc95b5d",
+    "timestamp": "2026-08-11T16:12:37.388483",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "descomposicion_subtemas",
+    "prompt_tokens": 181,
+    "completion_tokens": 22,
+    "total_tokens": 203,
+    "cache_hit_tokens": 128,
+    "cost_usd": 1.54e-05,
+    "metadata": {
+      "weeks_count": 1
+    }
+  },
+  {
+    "id": "787c9145-21f4-40fd-a55a-2ebf5b7cca73",
+    "timestamp": "2026-08-11T16:12:40.865978",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 207,
+    "completion_tokens": 71,
+    "total_tokens": 278,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.27e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "0e81a10a-10f7-49f8-b483-ff0be95fd606",
+    "timestamp": "2026-08-11T16:12:57.203985",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 223,
+    "completion_tokens": 84,
+    "total_tokens": 307,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.86e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "638b1c20-488e-4591-b354-2f02f12f47b1",
+    "timestamp": "2026-08-11T16:13:00.894137",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 262,
+    "completion_tokens": 151,
+    "total_tokens": 413,
+    "cache_hit_tokens": 256,
+    "cost_usd": 4.67e-05,
+    "metadata": {
+      "dudosos_count": 2
+    }
+  },
+  {
+    "id": "7d5c3326-b27d-4aea-b861-559578724999",
+    "timestamp": "2026-08-11T16:13:05.399726",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 293,
+    "completion_tokens": 197,
+    "total_tokens": 490,
+    "cache_hit_tokens": 256,
+    "cost_usd": 6.39e-05,
+    "metadata": {
+      "dudosos_count": 3
+    }
+  },
+  {
+    "id": "a689e93a-0081-4713-96eb-f0e77426fb3c",
+    "timestamp": "2026-08-11T16:13:15.184428",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 273,
+    "total_tokens": 1501,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0002484,
+    "metadata": {
+      "page_num": 1
+    }
+  },
+  {
+    "id": "93880501-4942-48c5-8ddc-fbb22aa22d2b",
+    "timestamp": "2026-08-11T16:13:27.661785",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 684,
+    "total_tokens": 1912,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0003634,
+    "metadata": {
+      "page_num": 2
+    }
+  },
+  {
+    "id": "96e226b9-708a-494e-97d7-f0b82a2a076f",
+    "timestamp": "2026-08-11T16:13:43.055489",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 709,
+    "total_tokens": 1937,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0003704,
+    "metadata": {
+      "page_num": 3
+    }
+  },
+  {
+    "id": "99096383-153f-4f51-9b61-1558e1138bbd",
+    "timestamp": "2026-08-11T16:15:50.991409",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "descomposicion_subtemas",
+    "prompt_tokens": 181,
+    "completion_tokens": 22,
+    "total_tokens": 203,
+    "cache_hit_tokens": 128,
+    "cost_usd": 1.54e-05,
+    "metadata": {
+      "weeks_count": 1
+    }
+  },
+  {
+    "id": "436a76ca-958f-4d81-ae3f-95a708153a2e",
+    "timestamp": "2026-08-11T16:15:52.867945",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 207,
+    "completion_tokens": 71,
+    "total_tokens": 278,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.27e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "fd950247-e884-4552-9a74-12c3c26d1e53",
+    "timestamp": "2026-08-11T16:16:07.386037",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 223,
+    "completion_tokens": 76,
+    "total_tokens": 299,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.64e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "dd95b920-ee9d-45eb-82c5-0e61a80131ac",
+    "timestamp": "2026-08-11T16:16:09.599037",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 262,
+    "completion_tokens": 151,
+    "total_tokens": 413,
+    "cache_hit_tokens": 256,
+    "cost_usd": 4.67e-05,
+    "metadata": {
+      "dudosos_count": 2
+    }
+  },
+  {
+    "id": "e678018d-982d-442a-8a88-acb26ebecd9f",
+    "timestamp": "2026-08-11T16:16:12.031695",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 293,
+    "completion_tokens": 191,
+    "total_tokens": 484,
+    "cache_hit_tokens": 256,
+    "cost_usd": 6.22e-05,
+    "metadata": {
+      "dudosos_count": 3
+    }
+  },
+  {
+    "id": "97b21adc-7910-4c4f-8ec8-6cafc015308f",
+    "timestamp": "2026-08-11T16:18:03.941597",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 374,
+    "total_tokens": 1602,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0002766,
+    "metadata": {
+      "page_num": 1
+    }
+  },
+  {
+    "id": "49f675d2-d2f7-43f7-bd3b-9bd3cf609631",
+    "timestamp": "2026-08-11T16:18:41.325751",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 719,
+    "total_tokens": 1947,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0003732,
+    "metadata": {
+      "page_num": 2
+    }
+  },
+  {
+    "id": "f7b63816-565d-451a-97f9-cd7362f52620",
+    "timestamp": "2026-08-11T16:19:37.288010",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 970,
+    "total_tokens": 2198,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0004435,
+    "metadata": {
+      "page_num": 3
+    }
+  },
+  {
+    "id": "477f5c64-3dff-4fd3-9d4b-e3723cdd60d1",
+    "timestamp": "2026-08-11T16:19:49.659897",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 813,
+    "total_tokens": 2041,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0003996,
+    "metadata": {
+      "page_num": 4
+    }
+  },
+  {
+    "id": "fea98990-578e-473a-aca4-b13479427479",
+    "timestamp": "2026-08-11T16:20:12.887433",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 995,
+    "total_tokens": 2223,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0004505,
+    "metadata": {
+      "page_num": 5
+    }
+  },
+  {
+    "id": "0a8d0ca4-4a2b-4574-b403-7a93fe713711",
+    "timestamp": "2026-08-11T16:20:25.705962",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 812,
+    "total_tokens": 2040,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0003993,
+    "metadata": {
+      "page_num": 6
+    }
+  },
+  {
+    "id": "50fb1df3-1080-4474-8d61-e365661459e9",
+    "timestamp": "2026-08-11T16:20:45.411380",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 1013,
+    "total_tokens": 2241,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0004556,
+    "metadata": {
+      "page_num": 7
+    }
+  },
+  {
+    "id": "0ae8968b-b3cb-42e2-bc30-ffe3b90c1b05",
+    "timestamp": "2026-08-11T16:23:05.930380",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "descomposicion_subtemas",
+    "prompt_tokens": 181,
+    "completion_tokens": 22,
+    "total_tokens": 203,
+    "cache_hit_tokens": 128,
+    "cost_usd": 1.54e-05,
+    "metadata": {
+      "weeks_count": 1
+    }
+  },
+  {
+    "id": "cb2f3b6c-17bd-453a-b62d-46bd0e4936ec",
+    "timestamp": "2026-08-11T16:23:07.719829",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 207,
+    "completion_tokens": 69,
+    "total_tokens": 276,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.22e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "2437dffa-8f98-468d-945a-5da140285827",
+    "timestamp": "2026-08-11T16:23:24.697371",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 223,
+    "completion_tokens": 76,
+    "total_tokens": 299,
+    "cache_hit_tokens": 128,
+    "cost_usd": 3.64e-05,
+    "metadata": {
+      "dudosos_count": 1
+    }
+  },
+  {
+    "id": "50546abf-488c-49a7-bfe4-fa6c4f705bab",
+    "timestamp": "2026-08-11T16:23:26.933999",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 262,
+    "completion_tokens": 149,
+    "total_tokens": 411,
+    "cache_hit_tokens": 256,
+    "cost_usd": 4.61e-05,
+    "metadata": {
+      "dudosos_count": 2
+    }
+  },
+  {
+    "id": "3508c75b-9c79-4cc6-aa49-f277b507e64a",
+    "timestamp": "2026-08-11T16:23:29.282318",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "juez_concordancia",
+    "prompt_tokens": 293,
+    "completion_tokens": 197,
+    "total_tokens": 490,
+    "cache_hit_tokens": 256,
+    "cost_usd": 6.39e-05,
+    "metadata": {
+      "dudosos_count": 3
+    }
+  },
+  {
+    "id": "ce86b72a-a3e3-4328-be97-998e7163c1f1",
+    "timestamp": "2026-08-11T17:51:02.460955",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 359,
+    "total_tokens": 1587,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0002724,
+    "metadata": {
+      "page_num": 1
+    }
+  },
+  {
+    "id": "d1a70a94-c5a8-4eea-b9ed-d69671dad15d",
+    "timestamp": "2026-08-11T17:51:30.033682",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 676,
+    "total_tokens": 1904,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0003612,
+    "metadata": {
+      "page_num": 2
+    }
+  },
+  {
+    "id": "045c920b-8aa1-4d5e-9212-364000fb2e50",
+    "timestamp": "2026-08-11T18:00:14.341401",
+    "provider": "gemini",
+    "model": "gemini-flash-latest",
+    "feature": "transcripcion_pdf_ocr",
+    "prompt_tokens": 1228,
+    "completion_tokens": 1085,
+    "total_tokens": 2313,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0004757,
+    "metadata": {
+      "page_num": 5
+    }
+  }
+]

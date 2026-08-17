@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import CORS_ORIGINS
 from app.core.session import sweep_expired_sessions
-from app.routers import activities, documents, export, generation, materials
+from app.routers import activities, documents, export, generation, materials, usage
 
 
 import asyncio
@@ -51,6 +51,7 @@ app.include_router(generation.router)
 app.include_router(export.router)
 app.include_router(materials.router)
 app.include_router(activities.router)
+app.include_router(usage.router)
 
 
 

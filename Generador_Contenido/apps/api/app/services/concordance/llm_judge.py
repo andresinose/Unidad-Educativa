@@ -56,6 +56,20 @@ def resolver_dudosos_batch(dudosos: list[dict[str, Any]], api_key: str | None = 
             if resp.status_code == 200:
                 data = resp.json()
                 content_text = data["choices"][0]["message"]["content"]
+                try:
+                    from app.core.usage_tracker import record_llm_usage
+                    usage_info = data.get("usage") or {}
+                    record_llm_usage(
+                        provider="deepseek",
+                        model=os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
+                        feature="juez_concordancia",
+                        prompt_tokens=usage_info.get("prompt_tokens", 0),
+                        completion_tokens=usage_info.get("completion_tokens", 0),
+                        cache_hit_tokens=usage_info.get("prompt_cache_hit_tokens", 0),
+                        metadata={"dudosos_count": len(dudosos)},
+                    )
+                except Exception:
+                    pass
         except Exception:
             pass
 

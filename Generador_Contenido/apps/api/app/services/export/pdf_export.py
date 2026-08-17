@@ -289,7 +289,7 @@ def export_concordance_pdf(
 
 
 def export_resource_pdf(resource: GeneratedResource) -> bytes:
-    """Exports a GeneratedResource (Sopa de Letras, Flashcards, Guía, Cuestionario) into a clean printable PDF."""
+    """Exports a GeneratedResource (Sopa de Letras, Flashcards, Guía, Cuestionario, Mapa Conceptual) into a clean printable PDF."""
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -333,6 +333,17 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
         spaceAfter=4,
     )
 
+    h3_style = ParagraphStyle(
+        "ResH3",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=10,
+        leading=13,
+        textColor=colors.HexColor("#0f172a"),
+        spaceBefore=6,
+        spaceAfter=3,
+    )
+
     body_style = ParagraphStyle(
         "ResBody",
         parent=styles["Normal"],
@@ -340,7 +351,7 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
         fontSize=9,
         leading=13,
         textColor=colors.HexColor("#1e293b"),
-        spaceAfter=6,
+        spaceAfter=4,
     )
 
     bold_cell = ParagraphStyle(
@@ -361,6 +372,15 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
         leading=12,
         textColor=colors.HexColor("#0a2f68"),
         alignment=1,
+    )
+
+    callout_style = ParagraphStyle(
+        "CalloutText",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=8.5,
+        leading=12,
+        textColor=colors.HexColor("#78350f"),
     )
 
     story = []
@@ -417,17 +437,21 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
                 story.append(Spacer(1, 10))
 
         elif block.type == ResourceBlockType.flashcards:
+            instructions = payload.get("instructions") or "Revisa las tarjetas de estudio para repasar los conceptos clave."
+            story.append(Paragraph(instructions, body_style))
+            story.append(Spacer(1, 4))
             cards = payload.get("cards") or []
             if cards:
-                card_rows = [[Paragraph("Término / Concepto", bold_cell), Paragraph("Definición / Explicación", bold_cell)]]
+                card_rows = [[Paragraph("Categoría / Frente (Concepto)", bold_cell), Paragraph("Reverso (Definición / Explicación)", bold_cell)]]
                 for c in cards:
+                    cat = c.get("category") or "Concepto"
                     front = c.get("front") or c.get("term") or ""
                     back = c.get("back") or c.get("definition") or ""
                     card_rows.append([
-                        Paragraph(f"<b>{front}</b>", body_style),
+                        Paragraph(f"<b>[{cat}]</b><br/>{front}", body_style),
                         Paragraph(back, body_style)
                     ])
-                c_table = Table(card_rows, colWidths=[180, 340])
+                c_table = Table(card_rows, colWidths=[190, 330])
                 c_table.setStyle(
                     TableStyle([
                         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0a2f68")),
@@ -435,6 +459,7 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
                         ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
                         ("TOPPADDING", (0, 0), (-1, -1), 6),
                         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
                         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
                     ])
                 )
@@ -442,16 +467,121 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
                 story.append(Spacer(1, 10))
 
         elif block.type == ResourceBlockType.interactive_activity:
-            questions = payload.get("questions") or []
-            for idx, q in enumerate(questions, 1):
-                q_text = q.get("question_text") or q.get("pregunta") or ""
-                story.append(Paragraph(f"<b>Pregunta {idx}:</b> {q_text}", body_style))
+            instructions = payload.get("instructions") or "Lee atentamente cada pregunta y selecciona la respuesta correcta."
+            story.append(Paragraph(instructions, body_style))
+            story.append(Spacer(1, 6))
+
+            items = payload.get("items") or payload.get("questions") or payload.get("preguntas") or []
+            for idx, q in enumerate(items, 1):
+                q_text = q.get("question") or q.get("question_text") or q.get("pregunta") or ""
+                story.append(Paragraph(f"<b>Pregunta {idx}:</b> {q_text}", h3_style))
                 opts = q.get("options") or q.get("opciones") or []
+                correct_idx = q.get("correct_index") if q.get("correct_index") is not None else q.get("correct")
+                explanation = q.get("explanation") or q.get("explicacion") or ""
+
                 for o_idx, opt in enumerate(opts):
                     letter_opt = chr(65 + o_idx)
-                    story.append(Paragraph(f"&nbsp;&nbsp;&nbsp;&nbsp;<b>{letter_opt})</b> {opt}", body_style))
+                    is_correct = (correct_idx == o_idx)
+                    if is_correct:
+                        opt_str = f"&nbsp;&nbsp;&nbsp;&nbsp;<b>{letter_opt}) {opt}</b> <font color='#059669'>✓ (Correcta)</font>"
+                    else:
+                        opt_str = f"&nbsp;&nbsp;&nbsp;&nbsp;<b>{letter_opt})</b> {opt}"
+                    story.append(Paragraph(opt_str, body_style))
+
+                if explanation:
+                    expl_p = Paragraph(f"💡 <b>Retroalimentación / Explicación:</b> {explanation}", callout_style)
+                    expl_table = Table([[expl_p]], colWidths=[520])
+                    expl_table.setStyle(
+                        TableStyle([
+                            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fef3c7")),
+                            ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#fde68a")),
+                            ("TOPPADDING", (0, 0), (-1, -1), 5),
+                            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                        ])
+                    )
+                    story.append(Spacer(1, 3))
+                    story.append(expl_table)
+                story.append(Spacer(1, 8))
+
+        elif block.type == ResourceBlockType.diagram:
+            nodes = payload.get("nodes") or []
+            edges = payload.get("edges") or []
+            d_type = payload.get("diagram_type") or "concept_map"
+            
+            type_label = "Mapa Conceptual" if d_type == "concept_map" else "Esquema / Diagrama de Flujo"
+            story.append(Paragraph(f"<b>Estructura Visual ({type_label}):</b>", body_style))
+            story.append(Spacer(1, 4))
+
+            # 1. Tabla de Nodos del Mapa
+            if nodes:
+                node_type_names = {
+                    "concept": ("💡 Concepto", colors.HexColor("#eef6ff"), colors.HexColor("#3b82f6")),
+                    "process": ("⚡ Paso / Acción", colors.HexColor("#f0fdf4"), colors.HexColor("#22c55e")),
+                    "example": ("🔍 Ejemplo Práctico", colors.HexColor("#fef3c7"), colors.HexColor("#f59e0b")),
+                    "outcome": ("🎯 Resultado / Regla", colors.HexColor("#f3e8ff"), colors.HexColor("#a855f7")),
+                }
+
+                node_table_rows = [[Paragraph("Categoría del Nodo", bold_cell), Paragraph("Concepto / Elemento del Esquema", bold_cell)]]
+                for n in nodes:
+                    n_label = n.get("label") or ""
+                    n_type = n.get("node_type") or "concept"
+                    badge_info = node_type_names.get(n_type, node_type_names["concept"])
+                    
+                    cat_p = Paragraph(f"<b>{badge_info[0]}</b>", ParagraphStyle("NodeCat", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=8.5, textColor=badge_info[2]))
+                    val_p = Paragraph(f"<b>{n_label}</b>", body_style)
+                    node_table_rows.append([cat_p, val_p])
+
+                n_table = Table(node_table_rows, colWidths=[160, 360])
+                n_table.setStyle(
+                    TableStyle([
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0a2f68")),
+                        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e1")),
+                        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                        ("TOPPADDING", (0, 0), (-1, -1), 6),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+                    ])
+                )
+                story.append(n_table)
+                story.append(Spacer(1, 10))
+
+            # 2. Relaciones y Enlaces entre Nodos
+            if edges:
+                node_dict = {n.get("id"): n.get("label") for n in nodes if n.get("id")}
+                edge_table_rows = [[Paragraph("Nodo Origen", bold_cell), Paragraph("Conector / Enlace", bold_cell), Paragraph("Nodo Destino", bold_cell)]]
+                for e in edges:
+                    src_id = e.get("source") or ""
+                    tgt_id = e.get("target") or ""
+                    rel_label = e.get("label") or "se relaciona con"
+                    
+                    src_name = node_dict.get(src_id, src_id)
+                    tgt_name = node_dict.get(tgt_id, tgt_id)
+
+                    edge_table_rows.append([
+                        Paragraph(f"<b>{src_name}</b>", body_style),
+                        Paragraph(f"➔ <i>{rel_label}</i> ➔", ParagraphStyle("RelLabel", parent=styles["Normal"], fontName="Helvetica-Oblique", fontSize=8.5, alignment=1, textColor=colors.HexColor("#475569"))),
+                        Paragraph(f"<b>{tgt_name}</b>", body_style),
+                    ])
+
+                e_table = Table(edge_table_rows, colWidths=[180, 160, 180])
+                e_table.setStyle(
+                    TableStyle([
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#059669")),
+                        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e1")),
+                        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                        ("TOPPADDING", (0, 0), (-1, -1), 5),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f0fdf4")]),
+                    ])
+                )
+                story.append(Paragraph("<b>Relaciones y Enlaces del Mapa Conceptual:</b>", body_style))
                 story.append(Spacer(1, 4))
-            story.append(Spacer(1, 6))
+                story.append(e_table)
+                story.append(Spacer(1, 10))
 
         elif block.type == ResourceBlockType.crossword:
             instructions = payload.get("instructions") or "Lee las pistas y completa el crucigrama."
@@ -520,18 +650,49 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
                     story.append(Spacer(1, 10))
 
         elif block.type == ResourceBlockType.study_guide:
+            summary = payload.get("summary") or ""
+            if summary:
+                sum_p = Paragraph(f"<b>Resumen de la Ficha:</b> {summary}", body_style)
+                sum_table = Table([[sum_p]], colWidths=[520])
+                sum_table.setStyle(
+                    TableStyle([
+                        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#eff6ff")),
+                        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#bfdbfe")),
+                        ("TOPPADDING", (0, 0), (-1, -1), 6),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                    ])
+                )
+                story.append(sum_table)
+                story.append(Spacer(1, 8))
+
             sections = payload.get("sections") or []
             for sec in sections:
-                sec_t = sec.get("section_title") or sec.get("titulo") or ""
-                if sec_t:
-                    story.append(Paragraph(f"<b>{sec_t}</b>", h2_style))
+                sec_t = sec.get("heading") or sec.get("section_title") or sec.get("titulo") or "Sección de Estudio"
+                story.append(Paragraph(f"<b>{sec_t}</b>", h2_style))
+                
                 bullets = sec.get("bullets") or sec.get("puntos") or []
                 for b in bullets:
                     story.append(Paragraph(f"• {b}", body_style))
+
                 takeaway = sec.get("key_takeaway") or sec.get("idea_clave")
                 if takeaway:
-                    story.append(Paragraph(f"<b>Idea Clave:</b> {takeaway}", body_style))
-                story.append(Spacer(1, 4))
+                    tk_p = Paragraph(f"💡 <b>Idea Clave:</b> {takeaway}", callout_style)
+                    tk_table = Table([[tk_p]], colWidths=[520])
+                    tk_table.setStyle(
+                        TableStyle([
+                            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fef3c7")),
+                            ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#fde68a")),
+                            ("TOPPADDING", (0, 0), (-1, -1), 5),
+                            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                        ])
+                    )
+                    story.append(Spacer(1, 3))
+                    story.append(tk_table)
+                story.append(Spacer(1, 8))
 
         else:
             clean_html = re.sub(r"<style[^>]*>.*?</style>", "", block.rendered_html, flags=re.DOTALL | re.IGNORECASE)
@@ -544,3 +705,4 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
 
     doc.build(story)
     return buffer.getvalue()
+

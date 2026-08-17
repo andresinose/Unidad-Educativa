@@ -120,6 +120,20 @@ def descomponer_subtemas_batch(weeks: list[SilaboWeek], api_key: str | None = No
             if resp.status_code == 200:
                 data = resp.json()
                 content_text = data["choices"][0]["message"]["content"]
+                try:
+                    from app.core.usage_tracker import record_llm_usage
+                    usage_info = data.get("usage") or {}
+                    record_llm_usage(
+                        provider="deepseek",
+                        model=os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
+                        feature="descomposicion_subtemas",
+                        prompt_tokens=usage_info.get("prompt_tokens", 0),
+                        completion_tokens=usage_info.get("completion_tokens", 0),
+                        cache_hit_tokens=usage_info.get("prompt_cache_hit_tokens", 0),
+                        metadata={"weeks_count": len(weeks_to_parse)},
+                    )
+                except Exception:
+                    pass
         except Exception:
             pass
 

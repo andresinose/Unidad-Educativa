@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import httpx
 
+from app.core.usage_tracker import record_llm_usage
 from app.core.config import (
     ANTHROPIC_API_KEY,
     DEEPSEEK_API_KEY,
@@ -347,7 +348,7 @@ def generate_resource_gemini(
         """Crea un rompecabezas de lógica y relación (emparejar columnas o secuencia ordenada)."""
         return ""
 
-    models_to_try = [GEMINI_MODEL, "gemini-2.5-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
+    models_to_try = [GEMINI_MODEL, "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"]
     seen = set()
     models_to_try = [m for m in models_to_try if m and not (m in seen or seen.add(m))]
 
@@ -391,6 +392,20 @@ def generate_resource_gemini(
 
     if response is None:
         raise RuntimeError(f"Fallo en la llamada a Gemini. Último error: {last_error}")
+
+    try:
+        um = getattr(response, "usage_metadata", None)
+        if um:
+            record_llm_usage(
+                provider="gemini",
+                model=GEMINI_MODEL or "gemini-2.5-flash",
+                feature="generacion_recurso",
+                prompt_tokens=getattr(um, "prompt_token_count", 0) or 0,
+                completion_tokens=getattr(um, "candidates_token_count", 0) or 0,
+                metadata={"week_number": week.week_number, "topic": week.topic, "intent": request.intent if request else ""},
+            )
+    except Exception:
+        pass
 
     blocks: list[ResourceBlock] = []
     trace: list[str] = []
@@ -573,6 +588,16 @@ def generate_resource_deepseek(
         if r.status_code != 200:
             raise RuntimeError(f"DeepSeek API error {r.status_code}: {r.text}")
         response_data = r.json()
+        usage_info = response_data.get("usage") or {}
+        record_llm_usage(
+            provider="deepseek",
+            model=DEEPSEEK_MODEL or "deepseek-chat",
+            feature="generacion_recurso",
+            prompt_tokens=usage_info.get("prompt_tokens", 0),
+            completion_tokens=usage_info.get("completion_tokens", 0),
+            cache_hit_tokens=usage_info.get("prompt_cache_hit_tokens", 0),
+            metadata={"week_number": week.week_number, "topic": week.topic, "intent": request.intent if request else ""},
+        )
     except Exception as exc:
         raise RuntimeError(f"Fallo en la llamada a DeepSeek API: {exc}")
 
