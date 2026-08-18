@@ -1,0 +1,20 @@
+# Archivos de entorno y credenciales
+.env
+*.env
+env
+Generador_Contenido/apps/api/env
+Generador_Contenido/apps/api/.env
+
+# Node y Python
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+
+# Archivos de sistema y logs
+*.log
+.DS_Store
+Thumbs.db

@@ -815,5 +815,22 @@
     "metadata": {
       "page_num": 5
     }
+  },
+  {
+    "id": "3553d82e-1556-475a-a8d4-388beae61a76",
+    "timestamp": "2026-08-18T12:20:15.293683",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "feature": "generacion_recurso",
+    "prompt_tokens": 2730,
+    "completion_tokens": 221,
+    "total_tokens": 2951,
+    "cache_hit_tokens": 0,
+    "cost_usd": 0.0004441,
+    "metadata": {
+      "week_number": 5,
+      "topic": "Potenciación, radicación y polinomios aritméticos con números enteros. Jerarquía de operaciones.",
+      "intent": "presentar"
+    }
   }
 ]
