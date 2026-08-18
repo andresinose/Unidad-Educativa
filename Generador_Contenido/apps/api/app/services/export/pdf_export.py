@@ -694,6 +694,66 @@ def export_resource_pdf(resource: GeneratedResource) -> bytes:
                     story.append(tk_table)
                 story.append(Spacer(1, 8))
 
+        elif block.type == ResourceBlockType.diagram:
+            nodes = payload.get("nodes") or []
+            edges = payload.get("edges") or []
+            
+            node_map = {n.get("id"): n for n in nodes if isinstance(n, dict)}
+
+            if nodes:
+                node_rows = [[
+                    Paragraph("Categoría / Tipo", bold_cell),
+                    Paragraph("Concepto / Elemento del Mapa", bold_cell)
+                ]]
+                for n in nodes:
+                    if not isinstance(n, dict):
+                        continue
+                    n_label = n.get("label", "")
+                    n_type = n.get("node_type", "concept")
+                    
+                    type_str = "💡 Concepto Clave"
+                    if n_type == "process":
+                        type_str = "⚡ Paso / Acción"
+                    elif n_type == "example":
+                        type_str = "🔍 Ejemplo Práctico"
+                    elif n_type == "outcome":
+                        type_str = "🎯 Resultado / Regla"
+
+                    node_rows.append([
+                        Paragraph(f"<b>{type_str}</b>", body_style),
+                        Paragraph(n_label, body_style)
+                    ])
+
+                n_table = Table(node_rows, colWidths=[150, 370])
+                n_table.setStyle(
+                    TableStyle([
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0a2f68")),
+                        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e1")),
+                        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                        ("TOPPADDING", (0, 0), (-1, -1), 6),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+                    ])
+                )
+                story.append(n_table)
+                story.append(Spacer(1, 10))
+
+            if edges:
+                story.append(Paragraph("<b>Relaciones y Flujos del Mapa Conceptual:</b>", h2_style))
+                for edge in edges:
+                    if not isinstance(edge, dict):
+                        continue
+                    src_id = edge.get("source", "")
+                    tgt_id = edge.get("target", "")
+                    e_label = edge.get("label", "relacionado con")
+                    
+                    src_label = node_map.get(src_id, {}).get("label", src_id)
+                    tgt_label = node_map.get(tgt_id, {}).get("label", tgt_id)
+
+                    rel_str = f"• <b>{src_label}</b> &nbsp;───[ <i>{e_label}</i> ]───► &nbsp;<b>{tgt_label}</b>"
+                    story.append(Paragraph(rel_str, body_style))
+                story.append(Spacer(1, 10))
+
         else:
             clean_html = re.sub(r"<style[^>]*>.*?</style>", "", block.rendered_html, flags=re.DOTALL | re.IGNORECASE)
             clean_html = re.sub(r"<script[^>]*>.*?</script>", "", clean_html, flags=re.DOTALL | re.IGNORECASE)
